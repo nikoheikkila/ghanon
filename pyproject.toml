@@ -59,6 +59,7 @@ ignore = [
     "ANN001",  # Missing type annotation for function argument - not required in tests
     "ANN201",  # Missing return type annotation for public function - not required in tests
     "S108",  # Probable insecure usage of temporary file or directory - false positive in tests
+    "S101",  # Use of assert detected - asserts are used in tests
 ]
 "main.py" = [
     "T201",  # Entrypoint is allowed to use print()

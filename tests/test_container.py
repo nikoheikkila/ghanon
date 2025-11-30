@@ -9,35 +9,42 @@ class TestContainer:
     """Tests for Container model."""
 
     def test_image_only(self):
-        c = Container.model_validate({"image": "node:18"})
-        assert_that(c.image).is_equal_to("node:18")
+        container = Container.model_validate({"image": "node:24"})
+        assert_that(container.image).is_equal_to("node:24")
 
     def test_with_credentials(self):
-        c = Container.model_validate(
+        container = Container.model_validate(
             {
                 "image": "ghcr.io/owner/image",
-                "credentials": {"username": "user", "password": "${{ secrets.TOKEN }}"},
+                "credentials": {
+                    "username": "user",
+                    "password": "${{ secrets.TOKEN }}",
+                },
             },
         )
-        assert_that(c.credentials.username).is_equal_to("user")
+
+        assert container.credentials is not None
+        assert_that(container.credentials.username).is_equal_to("user")
 
     def test_with_env(self):
-        c = Container.model_validate({"image": "node:18", "env": {"NODE_ENV": "test"}})
-        assert_that(c.env).contains_entry({"NODE_ENV": "test"})
+        container = Container.model_validate({"image": "node:24", "env": {"NODE_ENV": "test"}})
+        assert_that(container.env).contains_entry({"NODE_ENV": "test"})
 
     def test_with_ports(self):
-        c = Container.model_validate({"image": "nginx", "ports": [80, 443, "8080:80"]})
-        assert_that(c.ports).is_length(3)
+        ports = [80, 443, "8080:80"]
+        container = Container.model_validate({"image": "nginx", "ports": ports})
+        assert_that(container.ports).contains(*ports)
 
     def test_with_volumes(self):
-        c = Container.model_validate(
+        volumes = ["/tmp:/tmp", "my-vol:/data"]
+        container = Container.model_validate(
             {
-                "image": "node:18",
-                "volumes": ["/tmp:/tmp", "my-vol:/data"],
+                "image": "node:24",
+                "volumes": volumes,
             },
         )
-        assert_that(c.volumes).is_length(2)
+        assert_that(container.volumes).contains(*volumes)
 
     def test_with_options(self):
-        c = Container.model_validate({"image": "node:18", "options": "--cpus 2 --memory 4g"})
-        assert_that(c.options).contains("--cpus")
+        container = Container.model_validate({"image": "node:24", "options": "--cpus 2 --memory 4g"})
+        assert_that(container.options).contains("--cpus 2", "--memory 4g")

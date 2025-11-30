@@ -26,6 +26,7 @@ tasks:
 
   test:watch:
     desc: Run tests in watch mode
+    silent: true
     watch: true
     sources:
       - tests/**/*.py
