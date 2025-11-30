@@ -2,8 +2,8 @@ from pathlib import Path
 
 from assertpy import assert_that
 
-from ghanon.models.matrix import Strategy
-from ghanon.models.workflow import EventType
+from ghanon.domain.matrix import Strategy
+from ghanon.domain.workflow import EventType
 from ghanon.parser import parse_workflow_yaml
 
 

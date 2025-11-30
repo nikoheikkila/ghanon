@@ -2,7 +2,7 @@ import pytest
 from assertpy import assert_that
 from pydantic import ValidationError
 
-from ghanon.models.workflow import Step
+from ghanon.domain.workflow import Step
 
 command = "echo hello"
 uses = "actions/checkout@v4"

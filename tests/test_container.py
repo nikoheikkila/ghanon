@@ -1,6 +1,6 @@
 from assertpy import assert_that
 
-from ghanon.models.workflow import Container
+from ghanon.domain.workflow import Container
 
 
 class TestContainer:

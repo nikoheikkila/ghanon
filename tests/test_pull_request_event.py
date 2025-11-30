@@ -1,6 +1,6 @@
 from assertpy import assert_that
 
-from ghanon.models.workflow import PullRequestActivityType, PullRequestEvent
+from ghanon.domain.workflow import PullRequestActivityType, PullRequestEvent
 
 
 class TestPullRequestEvent:

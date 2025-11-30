@@ -4,9 +4,9 @@ import pytest
 from assertpy import assert_that
 from pydantic import ValidationError
 
-from ghanon.models.defaults import Defaults, DefaultsRun
-from ghanon.models.matrix import Strategy
-from ghanon.models.workflow import (
+from ghanon.domain.defaults import Defaults, DefaultsRun
+from ghanon.domain.matrix import Strategy
+from ghanon.domain.workflow import (
     Concurrency,
     EventType,
     OnConfiguration,

@@ -1,7 +1,7 @@
 from assertpy import assert_that
 from pydantic import ValidationError
 
-from ghanon.models.workflow import Concurrency
+from ghanon.domain.workflow import Concurrency
 
 
 class TestConcurrency:

@@ -1,6 +1,6 @@
 from assertpy import assert_that
 
-from ghanon.models.workflow import WorkflowCallEvent, WorkflowCallInputType
+from ghanon.domain.workflow import WorkflowCallEvent, WorkflowCallInputType
 
 
 class TestWorkflowCallEvent:

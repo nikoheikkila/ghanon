@@ -6,7 +6,7 @@ from typing import Any
 
 import yaml
 
-from .models.workflow import Workflow
+from .domain.workflow import Workflow
 
 __all__ = [
     "parse_workflow",

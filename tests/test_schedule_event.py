@@ -2,7 +2,7 @@ from typing import Any
 
 from assertpy import assert_that
 
-from ghanon.models.workflow import OnConfiguration, ScheduleItem
+from ghanon.domain.workflow import OnConfiguration, ScheduleItem
 from ghanon.parser import parse_workflow
 
 

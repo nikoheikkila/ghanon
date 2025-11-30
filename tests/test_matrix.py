@@ -1,7 +1,7 @@
 import pytest
 from assertpy import assert_that
 
-from ghanon.models.workflow import Matrix, Strategy
+from ghanon.domain.workflow import Matrix, Strategy
 
 
 @pytest.fixture

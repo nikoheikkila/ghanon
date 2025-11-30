@@ -1,7 +1,7 @@
 from assertpy import assert_that
 from pydantic import ValidationError
 
-from ghanon.models.workflow import PermissionLevel, PermissionsEvent
+from ghanon.domain.workflow import PermissionLevel, PermissionsEvent
 
 
 class TestPermissions:

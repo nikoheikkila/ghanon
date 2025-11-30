@@ -1,7 +1,7 @@
 from assertpy import assert_that
 from pydantic import ValidationError
 
-from ghanon.models.workflow import Defaults, DefaultsRun
+from ghanon.domain.workflow import Defaults, DefaultsRun
 
 
 class TestDefaults:

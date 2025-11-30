@@ -1,7 +1,7 @@
 import pytest
 from assertpy import assert_that
 
-from ghanon.models.workflow import Container, Environment, NormalJob, RunnerGroup
+from ghanon.domain.workflow import Container, Environment, NormalJob, RunnerGroup
 
 
 @pytest.fixture
