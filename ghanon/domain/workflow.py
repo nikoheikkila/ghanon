@@ -216,6 +216,24 @@ class Workflow(StrictModel):
         ),
     )
 
+    @field_validator("on")
+    @classmethod
+    def validate_on(cls, value: On) -> On:
+        """Validate workflow triggers.
+
+        Ensures that workflows using push.branches also include pull_request trigger
+        to avoid redundant CI runs and follow GitHub Actions best practices.
+        """
+        is_on_configuration = isinstance(value, OnConfiguration)
+        has_push_branches = is_on_configuration and value.push is not None and value.push.branches is not None
+        has_pull_request = is_on_configuration and value.pull_request is not None
+
+        if has_push_branches and not has_pull_request:
+            msg = "Use the `pull_request` trigger instead of the `push.branches` trigger."
+            raise ValueError(msg)
+
+        return value
+
     @field_validator("jobs")
     @classmethod
     def validate_job_ids(cls, v: dict[str, Job]) -> dict[str, Job]:
