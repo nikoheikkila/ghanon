@@ -57,6 +57,8 @@ ignore = [
     "D100",  # Missing docstring in public module - not required in tests
     "D101",  # Missing docstring in public class - not required in tests
     "D102",  # Missing docstring in public method - not required in tests
+    "D400",  # First line should end with a period - not required in tests
+    "D415",  # First line should end with a period - not required in tests
     "ANN001",  # Missing type annotation for function argument - not required in tests
     "ANN201",  # Missing return type annotation for public function - not required in tests
     "S108",  # Probable insecure usage of temporary file or directory - false positive in tests
