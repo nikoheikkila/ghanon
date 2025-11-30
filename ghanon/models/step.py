@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
 
+from .base import StrictModel
 from .defaults import ShellType
 
 __all__ = [
@@ -36,17 +37,6 @@ jobs.<job_id>.steps[*].env, jobs.<job_id>.env, and env keywords.
 
 Reference: https://docs.github.com/en/actions/learn-github-actions/environment-variables
 """
-
-
-# =============================================================================
-# Base Models
-# =============================================================================
-
-
-class StrictModel(BaseModel):
-    """Base model with strict configuration."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 # =============================================================================

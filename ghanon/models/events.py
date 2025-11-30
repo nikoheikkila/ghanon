@@ -8,7 +8,9 @@ from __future__ import annotations
 from enum import Enum
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, Field, model_validator
+
+from .base import FlexibleModel, StrictModel
 
 __all__ = [
     "BranchProtectionRuleActivityType",
@@ -71,23 +73,6 @@ __all__ = [
 
 Globs = Annotated[list[str], Field(min_length=1)]
 """Array of glob patterns with at least one item."""
-
-
-# =============================================================================
-# Base Models
-# =============================================================================
-
-
-class StrictModel(BaseModel):
-    """Base model with strict configuration."""
-
-    model_config = ConfigDict(extra="forbid")
-
-
-class FlexibleModel(BaseModel):
-    """Base model allowing additional properties."""
-
-    model_config = ConfigDict(extra="allow")
 
 
 # =============================================================================

@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 
+from .base import StrictModel
 from .concurrency import Concurrency
 from .container import Container
 from .defaults import Defaults
@@ -51,17 +52,6 @@ jobs.<job_id>.steps[*].env, jobs.<job_id>.env, and env keywords.
 
 Reference: https://docs.github.com/en/actions/learn-github-actions/environment-variables
 """
-
-
-# =============================================================================
-# Base Models
-# =============================================================================
-
-
-class StrictModel(BaseModel):
-    """Base model with strict configuration."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 # =============================================================================

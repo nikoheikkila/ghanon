@@ -4,15 +4,11 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from .base import StrictModel
 
 __all__ = ["Concurrency"]
-
-
-class StrictModel(BaseModel):
-    """Base model with strict configuration."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 ExpressionSyntax = Annotated[str, Field(pattern=r"^\$\{\{(.|\r|\n)*\}\}$")]

@@ -10,8 +10,9 @@ import re
 from enum import Enum
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import Field, field_validator
 
+from .base import FlexibleModel, StrictModel
 from .concurrency import Concurrency
 from .container import Container, ContainerCredentials
 from .defaults import Defaults, DefaultsRun, ShellType
@@ -254,23 +255,6 @@ ExpressionSyntax = Annotated[str, Field(pattern=r"^\$\{\{(.|\r|\n)*\}\}$")]
 
 StringContainingExpression = Annotated[str, Field(pattern=r"^.*\$\{\{(.|\r|\n)*\}\}.*$")]
 """String containing GitHub Actions expression syntax."""
-
-
-# =============================================================================
-# Base Models
-# =============================================================================
-
-
-class StrictModel(BaseModel):
-    """Base model with strict configuration."""
-
-    model_config = ConfigDict(extra="forbid")
-
-
-class FlexibleModel(BaseModel):
-    """Base model allowing additional properties."""
-
-    model_config = ConfigDict(extra="allow")
 
 
 # =============================================================================

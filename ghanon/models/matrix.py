@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from .base import FlexibleModel, StrictModel
 
 __all__ = [
     "Configuration",
@@ -26,23 +28,6 @@ Configuration = str | int | float | bool | dict[str, Any] | list[Any]
 
 MatrixIncludeExclude = ExpressionSyntax | list[dict[str, Configuration]]
 """Include/exclude entries in a matrix."""
-
-
-# =============================================================================
-# Base Models
-# =============================================================================
-
-
-class StrictModel(BaseModel):
-    """Base model with strict configuration."""
-
-    model_config = ConfigDict(extra="forbid")
-
-
-class FlexibleModel(BaseModel):
-    """Base model allowing additional properties."""
-
-    model_config = ConfigDict(extra="allow")
 
 
 # =============================================================================

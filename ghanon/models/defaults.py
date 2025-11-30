@@ -4,19 +4,15 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
+
+from .base import StrictModel
 
 __all__ = [
     "Defaults",
     "DefaultsRun",
     "ShellType",
 ]
-
-
-class StrictModel(BaseModel):
-    """Base model with strict configuration."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 class ShellType(StrEnum):

@@ -2,15 +2,11 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
+
+from .base import StrictModel
 
 __all__ = ["Environment"]
-
-
-class StrictModel(BaseModel):
-    """Base model with strict configuration."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 class Environment(StrictModel):

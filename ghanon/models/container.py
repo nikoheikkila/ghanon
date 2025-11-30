@@ -4,18 +4,14 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
+
+from .base import StrictModel
 
 __all__ = [
     "Container",
     "ContainerCredentials",
 ]
-
-
-class StrictModel(BaseModel):
-    """Base model with strict configuration."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 EnvVarValue = str | int | float | bool

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
+
+from .base import StrictModel
 
 __all__ = [
     "ModelPermissionLevel",
@@ -13,17 +15,6 @@ __all__ = [
     "Permissions",
     "PermissionsEvent",
 ]
-
-
-# =============================================================================
-# Base Models
-# =============================================================================
-
-
-class StrictModel(BaseModel):
-    """Base model with strict configuration."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 # =============================================================================
