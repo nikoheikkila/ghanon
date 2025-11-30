@@ -30,3 +30,8 @@ tasks:
       - task: format
       - task: lint
       - task: test:unit
+
+  run:
+    desc: Run the application
+    cmds:
+      - uv run python main.py {{ .CLI_ARGS }}
