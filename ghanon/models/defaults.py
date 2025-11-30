@@ -2,28 +2,15 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
-
 from pydantic import Field, model_validator
 
 from .base import StrictModel
+from .enums import ShellType
 
 __all__ = [
     "Defaults",
     "DefaultsRun",
-    "ShellType",
 ]
-
-
-class ShellType(StrEnum):
-    """Built-in shell types."""
-
-    BASH = "bash"
-    PWSH = "pwsh"
-    PYTHON = "python"
-    SH = "sh"
-    CMD = "cmd"
-    POWERSHELL = "powershell"
 
 
 class DefaultsRun(StrictModel):
