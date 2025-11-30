@@ -9,7 +9,7 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field, model_validator
 
-from .base import FlexibleModel, StrictModel
+from .base import FilterableEventModel, FlexibleModel, StrictModel
 from .enums import (
     BranchProtectionRuleActivityType,
     CheckRunActivityType,
@@ -232,7 +232,7 @@ class ProjectColumnEvent(FlexibleModel):
     types: list[ProjectColumnActivityType] | ProjectColumnActivityType | None = None
 
 
-class PullRequestEvent(StrictModel):
+class PullRequestEvent(FilterableEventModel):
     """Pull request event configuration.
 
     Runs your workflow anytime the pull_request event occurs.
@@ -244,50 +244,9 @@ class PullRequestEvent(StrictModel):
     """
 
     types: list[PullRequestActivityType] | PullRequestActivityType | None = None
-    branches: Globs | None = Field(
-        default=None,
-        description="Filter to specific branches. Cannot be used with branches-ignore.",
-    )
-    branches_ignore: Globs | None = Field(
-        default=None,
-        alias="branches-ignore",
-        description="Branches to ignore. Cannot be used with branches.",
-    )
-    tags: Globs | None = Field(
-        default=None,
-        description="Filter to specific tags. Cannot be used with tags-ignore.",
-    )
-    tags_ignore: Globs | None = Field(
-        default=None,
-        alias="tags-ignore",
-        description="Tags to ignore. Cannot be used with tags.",
-    )
-    paths: Globs | None = Field(
-        default=None,
-        description="Filter to specific paths. Cannot be used with paths-ignore.",
-    )
-    paths_ignore: Globs | None = Field(
-        default=None,
-        alias="paths-ignore",
-        description="Paths to ignore. Cannot be used with paths.",
-    )
-
-    @model_validator(mode="after")
-    def check_filter_exclusivity(self) -> PullRequestEvent:
-        """Validate that inclusive and exclusive filters are not used together."""
-        if self.branches is not None and self.branches_ignore is not None:
-            msg = "Cannot use both 'branches' and 'branches-ignore'"
-            raise ValueError(msg)
-        if self.tags is not None and self.tags_ignore is not None:
-            msg = "Cannot use both 'tags' and 'tags-ignore'"
-            raise ValueError(msg)
-        if self.paths is not None and self.paths_ignore is not None:
-            msg = "Cannot use both 'paths' and 'paths-ignore'"
-            raise ValueError(msg)
-        return self
 
 
-class PullRequestTargetEvent(StrictModel):
+class PullRequestTargetEvent(FilterableEventModel):
     """Pull request target event configuration.
 
     This event is similar to pull_request, except that it runs in the context
@@ -297,26 +256,6 @@ class PullRequestTargetEvent(StrictModel):
     """
 
     types: list[PullRequestTargetActivityType] | PullRequestTargetActivityType | None = None
-    branches: Globs | None = None
-    branches_ignore: Globs | None = Field(default=None, alias="branches-ignore")
-    tags: Globs | None = None
-    tags_ignore: Globs | None = Field(default=None, alias="tags-ignore")
-    paths: Globs | None = None
-    paths_ignore: Globs | None = Field(default=None, alias="paths-ignore")
-
-    @model_validator(mode="after")
-    def check_filter_exclusivity(self) -> PullRequestTargetEvent:
-        """Validate that inclusive and exclusive filters are not used together."""
-        if self.branches is not None and self.branches_ignore is not None:
-            msg = "Cannot use both 'branches' and 'branches-ignore'"
-            raise ValueError(msg)
-        if self.tags is not None and self.tags_ignore is not None:
-            msg = "Cannot use both 'tags' and 'tags-ignore'"
-            raise ValueError(msg)
-        if self.paths is not None and self.paths_ignore is not None:
-            msg = "Cannot use both 'paths' and 'paths-ignore'"
-            raise ValueError(msg)
-        return self
 
 
 class PullRequestReviewEvent(FlexibleModel):
@@ -341,34 +280,13 @@ class PullRequestReviewCommentEvent(FlexibleModel):
     types: list[PullRequestReviewCommentActivityType] | PullRequestReviewCommentActivityType | None = None
 
 
-class PushEvent(StrictModel):
+class PushEvent(FilterableEventModel):
     """Push event configuration.
 
     Runs your workflow when someone pushes to a repository branch.
 
     Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/events-that-trigger-workflows#push-event-push
     """
-
-    branches: Globs | None = None
-    branches_ignore: Globs | None = Field(default=None, alias="branches-ignore")
-    tags: Globs | None = None
-    tags_ignore: Globs | None = Field(default=None, alias="tags-ignore")
-    paths: Globs | None = None
-    paths_ignore: Globs | None = Field(default=None, alias="paths-ignore")
-
-    @model_validator(mode="after")
-    def check_filter_exclusivity(self) -> PushEvent:
-        """Validate that inclusive and exclusive filters are not used together."""
-        if self.branches is not None and self.branches_ignore is not None:
-            msg = "Cannot use both 'branches' and 'branches-ignore'"
-            raise ValueError(msg)
-        if self.tags is not None and self.tags_ignore is not None:
-            msg = "Cannot use both 'tags' and 'tags-ignore'"
-            raise ValueError(msg)
-        if self.paths is not None and self.paths_ignore is not None:
-            msg = "Cannot use both 'paths' and 'paths-ignore'"
-            raise ValueError(msg)
-        return self
 
 
 class RegistryPackageEvent(FlexibleModel):
