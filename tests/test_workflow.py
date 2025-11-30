@@ -1,5 +1,4 @@
-"""
-Comprehensive tests for GitHub Actions Workflow Pydantic models using assertpy.
+"""Comprehensive tests for GitHub Actions Workflow Pydantic models using assertpy.
 
 Run with: pytest test_workflow.py -v
 Fast run:  pytest test_workflow.py -q --tb=short
@@ -10,62 +9,61 @@ from assertpy import assert_that
 from pydantic import ValidationError
 
 from ghanon.models.workflow import (
-    # Main models
-    NormalJob,
-    ReusableWorkflowCallJob,
-    Step,
+    BranchProtectionRuleEvent,
+    CheckRunEvent,
+    CheckSuiteEvent,
     # Supporting models
     Concurrency,
     Container,
     Defaults,
     DefaultsRun,
-    Environment,
-    Matrix,
-    PermissionsEvent,
-    RunnerGroup,
-    Strategy,
-    # Event models
-    OnConfiguration,
-    BranchProtectionRuleEvent,
-    CheckRunEvent,
-    CheckSuiteEvent,
-    DiscussionEvent,
     DiscussionCommentEvent,
+    DiscussionEvent,
+    Environment,
+    # Enums
+    EventType,
     IssueCommentEvent,
     IssuesEvent,
     LabelEvent,
+    Matrix,
     MergeGroupEvent,
     MilestoneEvent,
-    ProjectEvent,
+    # Main models
+    NormalJob,
+    # Event models
+    OnConfiguration,
+    PermissionAccess,
+    PermissionLevel,
+    PermissionsEvent,
     ProjectCardEvent,
     ProjectColumnEvent,
+    ProjectEvent,
+    # Activity types
+    PullRequestActivityType,
     PullRequestEvent,
-    PullRequestTargetEvent,
-    PullRequestReviewEvent,
     PullRequestReviewCommentEvent,
+    PullRequestReviewEvent,
+    PullRequestTargetEvent,
     PushEvent,
     RegistryPackageEvent,
     ReleaseEvent,
+    ReusableWorkflowCallJob,
+    RunnerGroup,
     ScheduleItem,
+    Step,
+    Strategy,
     WorkflowCallEvent,
+    WorkflowCallInputType,
     WorkflowDispatchEvent,
-    WorkflowRunEvent,
     # Input/output models
     WorkflowDispatchInput,
-    # Enums
-    EventType,
-    PermissionLevel,
-    PermissionAccess,
-    WorkflowCallInputType,
     WorkflowDispatchInputType,
-    # Activity types
-    PullRequestActivityType,
     WorkflowRunActivityType,
+    WorkflowRunEvent,
     # Functions
     parse_workflow,
     parse_workflow_yaml,
 )
-
 
 # =============================================================================
 # Fixtures
@@ -108,14 +106,12 @@ class TestWorkflow:
                 "run-name": "Deploy by @${{ github.actor }}",
                 "on": "push",
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.run_name).is_equal_to("Deploy by @${{ github.actor }}")
 
     def test_event_list(self, minimal_job):
-        w = parse_workflow(
-            {"on": ["push", "pull_request"], "jobs": {"build": minimal_job}}
-        )
+        w = parse_workflow({"on": ["push", "pull_request"], "jobs": {"build": minimal_job}})
         assert_that(w.on).is_equal_to([EventType.PUSH, EventType.PULL_REQUEST])
 
     def test_env(self, minimal_job):
@@ -124,7 +120,7 @@ class TestWorkflow:
                 "on": "push",
                 "env": {"CI": "true", "NODE_VERSION": 18},
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.env).is_equal_to({"CI": "true", "NODE_VERSION": 18})
 
@@ -134,7 +130,7 @@ class TestWorkflow:
                 "on": "push",
                 "defaults": {"run": {"shell": "bash", "working-directory": "./src"}},
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.defaults.run.shell).is_equal_to("bash")
         assert_that(w.defaults.run.working_directory).is_equal_to("./src")
@@ -145,7 +141,7 @@ class TestWorkflow:
                 "on": "push",
                 "concurrency": "ci-${{ github.ref }}",
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.concurrency).is_equal_to("ci-${{ github.ref }}")
 
@@ -158,15 +154,13 @@ class TestWorkflow:
                     "cancel-in-progress": True,
                 },
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.concurrency).is_instance_of(Concurrency)
         assert_that(w.concurrency.cancel_in_progress).is_true()
 
     def test_permissions_global(self, minimal_job):
-        w = parse_workflow(
-            {"on": "push", "permissions": "read-all", "jobs": {"build": minimal_job}}
-        )
+        w = parse_workflow({"on": "push", "permissions": "read-all", "jobs": {"build": minimal_job}})
         assert_that(w.permissions).is_equal_to(PermissionAccess.READ_ALL)
 
     def test_permissions_granular(self, minimal_job):
@@ -179,7 +173,7 @@ class TestWorkflow:
                     "issues": "none",
                 },
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.permissions).is_instance_of(PermissionsEvent)
         assert_that(w.permissions.contents).is_equal_to(PermissionLevel.READ)
@@ -187,31 +181,21 @@ class TestWorkflow:
         assert_that(w.permissions.issues).is_equal_to(PermissionLevel.NONE)
 
     def test_missing_on_fails(self, minimal_job):
-        assert_that(parse_workflow).raises(ValidationError).when_called_with(
-            {"jobs": {"build": minimal_job}}
-        )
+        assert_that(parse_workflow).raises(ValidationError).when_called_with({"jobs": {"build": minimal_job}})
 
     def test_missing_jobs_fails(self):
-        assert_that(parse_workflow).raises(ValidationError).when_called_with(
-            {"on": "push"}
-        )
+        assert_that(parse_workflow).raises(ValidationError).when_called_with({"on": "push"})
 
     def test_empty_jobs_fails(self):
-        assert_that(parse_workflow).raises(ValidationError).when_called_with(
-            {"on": "push", "jobs": {}}
-        )
+        assert_that(parse_workflow).raises(ValidationError).when_called_with({"on": "push", "jobs": {}})
 
-    @pytest.mark.parametrize(
-        "invalid_id", ["123start", "-invalid", "has space", "has.dot"]
-    )
+    @pytest.mark.parametrize("invalid_id", ["123start", "-invalid", "has space", "has.dot"])
     def test_invalid_job_id_fails(self, invalid_id, minimal_job):
         assert_that(parse_workflow).raises(ValidationError).when_called_with(
-            {"on": "push", "jobs": {invalid_id: minimal_job}}
+            {"on": "push", "jobs": {invalid_id: minimal_job}},
         )
 
-    @pytest.mark.parametrize(
-        "valid_id", ["build", "_private", "test_job", "job-1", "A1"]
-    )
+    @pytest.mark.parametrize("valid_id", ["build", "_private", "test_job", "job-1", "A1"])
     def test_valid_job_ids(self, valid_id, minimal_job):
         w = parse_workflow({"on": "push", "jobs": {valid_id: minimal_job}})
         assert_that(w.jobs).contains_key(valid_id)
@@ -234,14 +218,12 @@ class TestNormalJob:
             {
                 "runs-on": "ubuntu-latest",
                 "steps": [{"run": "echo test"}],
-            }
+            },
         )
         assert_that(job.steps).is_length(1)
 
     def test_name(self):
-        job = NormalJob.model_validate(
-            {"name": "Build Job", "runs-on": "ubuntu-latest"}
-        )
+        job = NormalJob.model_validate({"name": "Build Job", "runs-on": "ubuntu-latest"})
         assert_that(job.name).is_equal_to("Build Job")
 
     def test_needs_single(self):
@@ -249,9 +231,7 @@ class TestNormalJob:
         assert_that(job.needs).is_equal_to("build")
 
     def test_needs_multiple(self):
-        job = NormalJob.model_validate(
-            {"runs-on": "ubuntu-latest", "needs": ["build", "test"]}
-        )
+        job = NormalJob.model_validate({"runs-on": "ubuntu-latest", "needs": ["build", "test"]})
         assert_that(job.needs).is_equal_to(["build", "test"])
 
     def test_if_condition(self):
@@ -259,14 +239,12 @@ class TestNormalJob:
             {
                 "runs-on": "ubuntu-latest",
                 "if": "github.ref == 'refs/heads/main'",
-            }
+            },
         )
         assert_that(job.if_).is_equal_to("github.ref == 'refs/heads/main'")
 
     def test_environment_string(self):
-        job = NormalJob.model_validate(
-            {"runs-on": "ubuntu-latest", "environment": "production"}
-        )
+        job = NormalJob.model_validate({"runs-on": "ubuntu-latest", "environment": "production"})
         assert_that(job.environment).is_equal_to("production")
 
     def test_environment_object(self):
@@ -274,7 +252,7 @@ class TestNormalJob:
             {
                 "runs-on": "ubuntu-latest",
                 "environment": {"name": "production", "url": "https://example.com"},
-            }
+            },
         )
         assert_that(job.environment).is_instance_of(Environment)
         assert_that(job.environment.name).is_equal_to("production")
@@ -284,7 +262,7 @@ class TestNormalJob:
             {
                 "runs-on": "ubuntu-latest",
                 "outputs": {"version": "${{ steps.get_version.outputs.version }}"},
-            }
+            },
         )
         assert_that(job.outputs).contains_key("version")
 
@@ -293,27 +271,21 @@ class TestNormalJob:
             {
                 "runs-on": "ubuntu-latest",
                 "env": {"DEBUG": "true", "PORT": 3000},
-            }
+            },
         )
         assert_that(job.env).contains_entry({"DEBUG": "true"})
         assert_that(job.env).contains_entry({"PORT": 3000})
 
     def test_timeout_minutes(self):
-        job = NormalJob.model_validate(
-            {"runs-on": "ubuntu-latest", "timeout-minutes": 30}
-        )
+        job = NormalJob.model_validate({"runs-on": "ubuntu-latest", "timeout-minutes": 30})
         assert_that(job.timeout_minutes).is_equal_to(30)
 
     def test_continue_on_error(self):
-        job = NormalJob.model_validate(
-            {"runs-on": "ubuntu-latest", "continue-on-error": True}
-        )
+        job = NormalJob.model_validate({"runs-on": "ubuntu-latest", "continue-on-error": True})
         assert_that(job.continue_on_error).is_true()
 
     def test_container_string(self):
-        job = NormalJob.model_validate(
-            {"runs-on": "ubuntu-latest", "container": "node:18"}
-        )
+        job = NormalJob.model_validate({"runs-on": "ubuntu-latest", "container": "node:18"})
         assert_that(job.container).is_equal_to("node:18")
 
     def test_container_object(self):
@@ -327,7 +299,7 @@ class TestNormalJob:
                     "volumes": ["/tmp:/tmp"],
                     "options": "--cpus 2",
                 },
-            }
+            },
         )
         assert_that(job.container).is_instance_of(Container)
         assert_that(job.container.image).is_equal_to("node:18")
@@ -344,7 +316,7 @@ class TestNormalJob:
                     },
                     "redis": {"image": "redis:7"},
                 },
-            }
+            },
         )
         assert_that(job.services).contains_key("postgres")
         assert_that(job.services).contains_key("redis")
@@ -357,7 +329,7 @@ class TestNormalJob:
         job = NormalJob.model_validate(
             {
                 "runs-on": {"group": "large-runners", "labels": ["ubuntu-latest"]},
-            }
+            },
         )
         assert_that(job.runs_on).is_instance_of(RunnerGroup)
 
@@ -373,7 +345,7 @@ class TestReusableWorkflowCallJob:
         job = ReusableWorkflowCallJob.model_validate(
             {
                 "uses": "owner/repo/.github/workflows/workflow.yml@main",
-            }
+            },
         )
         assert_that(job.uses).contains("workflow.yml")
 
@@ -382,7 +354,7 @@ class TestReusableWorkflowCallJob:
             {
                 "uses": "owner/repo/.github/workflows/workflow.yml@v1",
                 "with": {"environment": "production", "debug": True},
-            }
+            },
         )
         assert_that(job.with_).contains_entry({"environment": "production"})
 
@@ -391,7 +363,7 @@ class TestReusableWorkflowCallJob:
             {
                 "uses": "owner/repo/.github/workflows/workflow.yml@main",
                 "secrets": "inherit",
-            }
+            },
         )
         assert_that(job.secrets).is_equal_to("inherit")
 
@@ -400,7 +372,7 @@ class TestReusableWorkflowCallJob:
             {
                 "uses": "owner/repo/.github/workflows/workflow.yml@main",
                 "secrets": {"API_KEY": "${{ secrets.API_KEY }}"},
-            }
+            },
         )
         assert_that(job.secrets).contains_key("API_KEY")
 
@@ -409,7 +381,7 @@ class TestReusableWorkflowCallJob:
             {
                 "uses": "./.github/workflows/reusable.yml",
                 "strategy": {"matrix": {"env": ["dev", "staging"]}},
-            }
+            },
         )
         assert_that(job.strategy).is_not_none()
 
@@ -418,9 +390,7 @@ class TestStrategy:
     """Tests for Strategy and Matrix models."""
 
     def test_simple_matrix(self):
-        s = Strategy.model_validate(
-            {"matrix": {"os": ["ubuntu-latest", "windows-latest"]}}
-        )
+        s = Strategy.model_validate({"matrix": {"os": ["ubuntu-latest", "windows-latest"]}})
         assert_that(s.matrix).is_instance_of(Matrix)
 
     def test_matrix_with_include(self):
@@ -429,11 +399,9 @@ class TestStrategy:
                 "matrix": {
                     "os": ["ubuntu-latest"],
                     "node": ["18", "20"],
-                    "include": [
-                        {"os": "ubuntu-latest", "node": "21", "experimental": True}
-                    ],
+                    "include": [{"os": "ubuntu-latest", "node": "21", "experimental": True}],
                 },
-            }
+            },
         )
         assert_that(s.matrix.include).is_not_none()
 
@@ -445,26 +413,20 @@ class TestStrategy:
                     "node": ["18", "20"],
                     "exclude": [{"os": "windows-latest", "node": "18"}],
                 },
-            }
+            },
         )
         assert_that(s.matrix.exclude).is_not_none()
 
     def test_fail_fast(self):
-        s = Strategy.model_validate(
-            {"matrix": {"os": ["ubuntu-latest"]}, "fail-fast": False}
-        )
+        s = Strategy.model_validate({"matrix": {"os": ["ubuntu-latest"]}, "fail-fast": False})
         assert_that(s.fail_fast).is_false()
 
     def test_max_parallel(self):
-        s = Strategy.model_validate(
-            {"matrix": {"os": ["ubuntu-latest"]}, "max-parallel": 2}
-        )
+        s = Strategy.model_validate({"matrix": {"os": ["ubuntu-latest"]}, "max-parallel": 2})
         assert_that(s.max_parallel).is_equal_to(2)
 
     def test_matrix_expression(self):
-        s = Strategy.model_validate(
-            {"matrix": "${{ fromJson(needs.setup.outputs.matrix) }}"}
-        )
+        s = Strategy.model_validate({"matrix": "${{ fromJson(needs.setup.outputs.matrix) }}"})
         assert_that(s.matrix).is_instance_of(str)
 
 
@@ -485,13 +447,11 @@ class TestStep:
         assert_that(step.uses).is_equal_to("actions/checkout@v4")
 
     def test_requires_uses_or_run(self):
-        assert_that(Step.model_validate).raises(ValidationError).when_called_with(
-            {"name": "Invalid"}
-        )
+        assert_that(Step.model_validate).raises(ValidationError).when_called_with({"name": "Invalid"})
 
     def test_cannot_have_both(self):
         assert_that(Step.model_validate).raises(ValidationError).when_called_with(
-            {"uses": "actions/checkout@v4", "run": "echo"}
+            {"uses": "actions/checkout@v4", "run": "echo"},
         )
 
     def test_id(self):
@@ -515,7 +475,7 @@ class TestStep:
             {
                 "uses": "actions/setup-node@v4",
                 "with": {"node-version": "18", "cache": "npm"},
-            }
+            },
         )
         assert_that(step.with_).contains_entry({"node-version": "18"})
 
@@ -533,12 +493,12 @@ class TestStep:
 
     def test_shell_requires_run(self):
         assert_that(Step.model_validate).raises(ValidationError).when_called_with(
-            {"uses": "actions/checkout@v4", "shell": "bash"}
+            {"uses": "actions/checkout@v4", "shell": "bash"},
         )
 
     def test_working_directory_requires_run(self):
         assert_that(Step.model_validate).raises(ValidationError).when_called_with(
-            {"uses": "actions/checkout@v4", "working-directory": "./app"}
+            {"uses": "actions/checkout@v4", "working-directory": "./app"},
         )
 
     def test_continue_on_error(self):
@@ -549,9 +509,7 @@ class TestStep:
         step = Step.model_validate({"run": "long-task", "timeout-minutes": 60})
         assert_that(step.timeout_minutes).is_equal_to(60)
 
-    @pytest.mark.parametrize(
-        "shell", ["bash", "pwsh", "python", "sh", "cmd", "powershell"]
-    )
+    @pytest.mark.parametrize("shell", ["bash", "pwsh", "python", "sh", "cmd", "powershell"])
     def test_shell_types(self, shell):
         step = Step.model_validate({"run": "echo", "shell": shell})
         assert_that(step.shell).is_equal_to(shell)
@@ -579,7 +537,7 @@ class TestPushEvent:
 
     def test_branches_exclusive(self):
         assert_that(PushEvent.model_validate).raises(ValidationError).when_called_with(
-            {"branches": ["main"], "branches-ignore": ["dev"]}
+            {"branches": ["main"], "branches-ignore": ["dev"]},
         )
 
     def test_tags(self):
@@ -592,7 +550,7 @@ class TestPushEvent:
 
     def test_tags_exclusive(self):
         assert_that(PushEvent.model_validate).raises(ValidationError).when_called_with(
-            {"tags": ["v*"], "tags-ignore": ["v0.*"]}
+            {"tags": ["v*"], "tags-ignore": ["v0.*"]},
         )
 
     def test_paths(self):
@@ -605,7 +563,7 @@ class TestPushEvent:
 
     def test_paths_exclusive(self):
         assert_that(PushEvent.model_validate).raises(ValidationError).when_called_with(
-            {"paths": ["src/**"], "paths-ignore": ["test/**"]}
+            {"paths": ["src/**"], "paths-ignore": ["test/**"]},
         )
 
 
@@ -613,9 +571,7 @@ class TestPullRequestEvent:
     """Tests for pull_request event configuration."""
 
     def test_types(self):
-        e = PullRequestEvent.model_validate(
-            {"types": ["opened", "synchronize", "reopened"]}
-        )
+        e = PullRequestEvent.model_validate({"types": ["opened", "synchronize", "reopened"]})
         assert_that(e.types).is_length(3)
         assert_that(e.types).contains(PullRequestActivityType.OPENED)
 
@@ -625,7 +581,7 @@ class TestPullRequestEvent:
                 "types": ["opened"],
                 "branches": ["main"],
                 "paths": ["src/**"],
-            }
+            },
         )
         assert_that(e.types).is_equal_to([PullRequestActivityType.OPENED])
         assert_that(e.branches).is_equal_to(["main"])
@@ -640,13 +596,11 @@ class TestPullRequestTargetEvent:
         assert_that(e.types).is_length(2)
 
     def test_filter_exclusivity(self):
-        assert_that(PullRequestTargetEvent.model_validate).raises(
-            ValidationError
-        ).when_called_with(
+        assert_that(PullRequestTargetEvent.model_validate).raises(ValidationError).when_called_with(
             {
                 "branches": ["main"],
                 "branches-ignore": ["feature/*"],
-            }
+            },
         )
 
 
@@ -662,7 +616,7 @@ class TestScheduleEvent:
             {
                 "on": {"schedule": [{"cron": "0 0 * * *"}, {"cron": "0 12 * * 1-5"}]},
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.on.schedule).is_length(2)
 
@@ -682,9 +636,9 @@ class TestWorkflowDispatchEvent:
                         "description": "Name",
                         "type": "string",
                         "default": "world",
-                    }
+                    },
                 },
-            }
+            },
         )
         assert_that(e.inputs["name"].type).is_equal_to(WorkflowDispatchInputType.STRING)
 
@@ -696,13 +650,11 @@ class TestWorkflowDispatchEvent:
                         "description": "Debug",
                         "type": "boolean",
                         "default": False,
-                    }
+                    },
                 },
-            }
+            },
         )
-        assert_that(e.inputs["debug"].type).is_equal_to(
-            WorkflowDispatchInputType.BOOLEAN
-        )
+        assert_that(e.inputs["debug"].type).is_equal_to(WorkflowDispatchInputType.BOOLEAN)
 
     def test_choice_input(self):
         e = WorkflowDispatchEvent.model_validate(
@@ -714,25 +666,23 @@ class TestWorkflowDispatchEvent:
                         "options": ["dev", "staging", "prod"],
                     },
                 },
-            }
+            },
         )
         assert_that(e.inputs["env"].options).is_equal_to(["dev", "staging", "prod"])
 
     def test_choice_requires_options(self):
-        assert_that(WorkflowDispatchInput.model_validate).raises(
-            ValidationError
-        ).when_called_with(
+        assert_that(WorkflowDispatchInput.model_validate).raises(ValidationError).when_called_with(
             {
                 "description": "Env",
                 "type": "choice",
-            }
+            },
         )
 
     def test_required_input(self):
         e = WorkflowDispatchEvent.model_validate(
             {
                 "inputs": {"token": {"description": "API Token", "required": True}},
-            }
+            },
         )
         assert_that(e.inputs["token"].required).is_true()
 
@@ -747,11 +697,9 @@ class TestWorkflowCallEvent:
                     "environment": {"type": "string", "required": True},
                     "debug": {"type": "boolean", "default": False},
                 },
-            }
+            },
         )
-        assert_that(e.inputs["environment"].type).is_equal_to(
-            WorkflowCallInputType.STRING
-        )
+        assert_that(e.inputs["environment"].type).is_equal_to(WorkflowCallInputType.STRING)
         assert_that(e.inputs["debug"].default).is_false()
 
     def test_outputs(self):
@@ -763,7 +711,7 @@ class TestWorkflowCallEvent:
                         "value": "${{ jobs.build.outputs.version }}",
                     },
                 },
-            }
+            },
         )
         assert_that(e.outputs).contains_key("version")
 
@@ -773,7 +721,7 @@ class TestWorkflowCallEvent:
                 "secrets": {
                     "API_KEY": {"description": "API key", "required": True},
                 },
-            }
+            },
         )
         assert_that(e.secrets["API_KEY"].required).is_true()
 
@@ -786,7 +734,7 @@ class TestWorkflowRunEvent:
             {
                 "types": ["completed"],
                 "workflows": ["CI"],
-            }
+            },
         )
         assert_that(e.types).contains(WorkflowRunActivityType.COMPLETED)
 
@@ -795,7 +743,7 @@ class TestWorkflowRunEvent:
             {
                 "workflows": ["Build"],
                 "branches": ["main"],
-            }
+            },
         )
         assert_that(e.branches).is_equal_to(["main"])
 
@@ -804,7 +752,7 @@ class TestActivityTypeEvents:
     """Tests for events with activity types."""
 
     @pytest.mark.parametrize(
-        "event_class,types",
+        ("event_class", "types"),
         [
             (BranchProtectionRuleEvent, ["created", "edited", "deleted"]),
             (CheckRunEvent, ["created", "rerequested", "completed"]),
@@ -843,7 +791,7 @@ class TestOnConfiguration:
                     "workflow_dispatch": {},
                 },
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.on).is_instance_of(OnConfiguration)
         assert_that(w.on.push).is_not_none()
@@ -855,7 +803,7 @@ class TestOnConfiguration:
             {
                 "on": {"create": None, "delete": None, "fork": None},
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.on).is_instance_of(OnConfiguration)
 
@@ -877,7 +825,7 @@ class TestContainer:
             {
                 "image": "ghcr.io/owner/image",
                 "credentials": {"username": "user", "password": "${{ secrets.TOKEN }}"},
-            }
+            },
         )
         assert_that(c.credentials.username).is_equal_to("user")
 
@@ -894,14 +842,12 @@ class TestContainer:
             {
                 "image": "node:18",
                 "volumes": ["/tmp:/tmp", "my-vol:/data"],
-            }
+            },
         )
         assert_that(c.volumes).is_length(2)
 
     def test_with_options(self):
-        c = Container.model_validate(
-            {"image": "node:18", "options": "--cpus 2 --memory 4g"}
-        )
+        c = Container.model_validate({"image": "node:18", "options": "--cpus 2 --memory 4g"})
         assert_that(c.options).contains("--cpus")
 
 
@@ -922,21 +868,15 @@ class TestDefaults:
         assert_that(d.run.working_directory).is_equal_to("./app")
 
     def test_run_both(self):
-        d = Defaults.model_validate(
-            {"run": {"shell": "pwsh", "working-directory": "./src"}}
-        )
+        d = Defaults.model_validate({"run": {"shell": "pwsh", "working-directory": "./src"}})
         assert_that(d.run.shell).is_equal_to("pwsh")
         assert_that(d.run.working_directory).is_equal_to("./src")
 
     def test_run_requires_property(self):
-        assert_that(DefaultsRun.model_validate).raises(
-            ValidationError
-        ).when_called_with({})
+        assert_that(DefaultsRun.model_validate).raises(ValidationError).when_called_with({})
 
     def test_defaults_requires_run(self):
-        assert_that(Defaults.model_validate).raises(ValidationError).when_called_with(
-            {}
-        )
+        assert_that(Defaults.model_validate).raises(ValidationError).when_called_with({})
 
 
 # =============================================================================
@@ -961,14 +901,12 @@ class TestConcurrency:
             {
                 "group": "ci",
                 "cancel-in-progress": "${{ github.event_name == 'pull_request' }}",
-            }
+            },
         )
         assert_that(c.cancel_in_progress).contains("${{")
 
     def test_group_required(self):
-        assert_that(Concurrency.model_validate).raises(
-            ValidationError
-        ).when_called_with({"cancel-in-progress": True})
+        assert_that(Concurrency.model_validate).raises(ValidationError).when_called_with({"cancel-in-progress": True})
 
 
 # =============================================================================
@@ -984,15 +922,11 @@ class TestEnvironment:
         assert_that(e.name).is_equal_to("production")
 
     def test_with_url(self):
-        e = Environment.model_validate(
-            {"name": "staging", "url": "https://staging.example.com"}
-        )
+        e = Environment.model_validate({"name": "staging", "url": "https://staging.example.com"})
         assert_that(e.url).is_equal_to("https://staging.example.com")
 
     def test_name_required(self):
-        assert_that(Environment.model_validate).raises(
-            ValidationError
-        ).when_called_with({"url": "https://example.com"})
+        assert_that(Environment.model_validate).raises(ValidationError).when_called_with({"url": "https://example.com"})
 
 
 # =============================================================================
@@ -1021,7 +955,7 @@ class TestPermissions:
                 "repository-projects": "read",
                 "security-events": "write",
                 "statuses": "write",
-            }
+            },
         )
         assert_that(p.actions).is_equal_to(PermissionLevel.READ)
         assert_that(p.id_token).is_equal_to(PermissionLevel.WRITE)
@@ -1170,7 +1104,7 @@ class TestRoundTrip:
         w2 = parse_workflow(d)
         assert_that(w1.name).is_equal_to(w2.name)
         assert_that(w1.jobs["build"].strategy.matrix.model_extra).is_equal_to(
-            w2.jobs["build"].strategy.matrix.model_extra
+            w2.jobs["build"].strategy.matrix.model_extra,
         )
 
 
@@ -1188,7 +1122,7 @@ class TestEdgeCases:
                 "on": "push",
                 "env": "${{ fromJson(needs.setup.outputs.env) }}",
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.env).contains("${{")
 
@@ -1201,7 +1135,7 @@ class TestEdgeCases:
             {
                 "runs-on": "ubuntu-latest",
                 "timeout-minutes": "${{ inputs.timeout }}",
-            }
+            },
         )
         assert_that(job.timeout_minutes).contains("${{")
 
@@ -1213,7 +1147,7 @@ echo "Line 1"
 echo "Line 2"
 echo "Line 3"
 """,
-            }
+            },
         )
         assert_that(step.run).contains("Line 1")
         assert_that(step.run).contains("Line 3")
@@ -1224,6 +1158,6 @@ echo "Line 3"
                 "name": "CI: Build & Test (v2.0)",
                 "on": "push",
                 "jobs": {"build": minimal_job},
-            }
+            },
         )
         assert_that(w.name).contains("&")

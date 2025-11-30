@@ -1,5 +1,4 @@
-"""
-Pydantic models for GitHub Actions Workflow schema.
+"""Pydantic models for GitHub Actions Workflow schema.
 
 Based on: https://json.schemastore.org/github-workflow.json
 Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions
@@ -7,109 +6,101 @@ Reference: https://help.github.com/en/github/automating-your-workflow-with-githu
 
 from __future__ import annotations
 
+import re
 from enum import Enum
 from typing import Annotated, Any, Literal
 
+import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-
 __all__ = [
-    # Main workflow model
-    "Workflow",
-    "parse_workflow",
-    "parse_workflow_yaml",
-    # Job models
-    "Job",
-    "NormalJob",
-    "ReusableWorkflowCallJob",
-    # Step model
-    "Step",
-    # Supporting models
+    "Architecture",
+    "BranchProtectionRuleActivityType",
+    "BranchProtectionRuleEvent",
+    "CheckRunActivityType",
+    "CheckRunEvent",
+    "CheckSuiteActivityType",
+    "CheckSuiteEvent",
     "Concurrency",
+    "Configuration",
     "Container",
     "ContainerCredentials",
     "Defaults",
     "DefaultsRun",
-    "Environment",
-    "Matrix",
-    "Permissions",
-    "PermissionsEvent",
-    "RunnerGroup",
-    "Strategy",
-    # Event models
-    "On",
-    "OnConfiguration",
-    "BranchProtectionRuleEvent",
-    "CheckRunEvent",
-    "CheckSuiteEvent",
-    "DiscussionEvent",
-    "DiscussionCommentEvent",
-    "IssueCommentEvent",
-    "IssuesEvent",
-    "LabelEvent",
-    "MergeGroupEvent",
-    "MilestoneEvent",
-    "ProjectEvent",
-    "ProjectCardEvent",
-    "ProjectColumnEvent",
-    "PullRequestEvent",
-    "PullRequestTargetEvent",
-    "PullRequestReviewEvent",
-    "PullRequestReviewCommentEvent",
-    "PushEvent",
-    "RegistryPackageEvent",
-    "ReleaseEvent",
-    "ScheduleItem",
-    "WorkflowCallEvent",
-    "WorkflowDispatchEvent",
-    "WorkflowRunEvent",
-    # Workflow call/dispatch inputs
-    "WorkflowCallInput",
-    "WorkflowCallOutput",
-    "WorkflowCallSecret",
-    "WorkflowDispatchInput",
-    # Enums
-    "Architecture",
-    "EventType",
-    "Machine",
-    "ModelPermissionLevel",
-    "PermissionAccess",
-    "PermissionLevel",
-    "ShellType",
-    "WorkflowCallInputType",
-    "WorkflowDispatchInputType",
-    # Activity type enums
-    "BranchProtectionRuleActivityType",
-    "CheckRunActivityType",
-    "CheckSuiteActivityType",
     "DiscussionActivityType",
     "DiscussionCommentActivityType",
-    "IssueCommentActivityType",
-    "IssuesActivityType",
-    "LabelActivityType",
-    "MergeGroupActivityType",
-    "MilestoneActivityType",
-    "ProjectActivityType",
-    "ProjectCardActivityType",
-    "ProjectColumnActivityType",
-    "PullRequestActivityType",
-    "PullRequestTargetActivityType",
-    "PullRequestReviewActivityType",
-    "PullRequestReviewCommentActivityType",
-    "RegistryPackageActivityType",
-    "ReleaseActivityType",
-    "WorkflowRunActivityType",
-    # Type aliases
-    "Configuration",
+    "DiscussionCommentEvent",
+    "DiscussionEvent",
     "EnvMapping",
     "EnvVarValue",
+    "Environment",
+    "EventType",
     "ExpressionSyntax",
     "Globs",
+    "IssueCommentActivityType",
+    "IssueCommentEvent",
+    "IssuesActivityType",
+    "IssuesEvent",
+    "Job",
     "JobName",
     "JobNeeds",
+    "LabelActivityType",
+    "LabelEvent",
+    "Machine",
+    "Matrix",
     "MatrixIncludeExclude",
+    "MergeGroupActivityType",
+    "MergeGroupEvent",
+    "MilestoneActivityType",
+    "MilestoneEvent",
+    "ModelPermissionLevel",
+    "NormalJob",
+    "On",
+    "OnConfiguration",
+    "PermissionAccess",
+    "PermissionLevel",
+    "Permissions",
+    "PermissionsEvent",
+    "ProjectActivityType",
+    "ProjectCardActivityType",
+    "ProjectCardEvent",
+    "ProjectColumnActivityType",
+    "ProjectColumnEvent",
+    "ProjectEvent",
+    "PullRequestActivityType",
+    "PullRequestEvent",
+    "PullRequestReviewActivityType",
+    "PullRequestReviewCommentActivityType",
+    "PullRequestReviewCommentEvent",
+    "PullRequestReviewEvent",
+    "PullRequestTargetActivityType",
+    "PullRequestTargetEvent",
+    "PushEvent",
+    "RegistryPackageActivityType",
+    "RegistryPackageEvent",
+    "ReleaseActivityType",
+    "ReleaseEvent",
+    "ReusableWorkflowCallJob",
+    "RunnerGroup",
     "RunsOn",
+    "ScheduleItem",
+    "ShellType",
+    "Step",
+    "Strategy",
     "StringContainingExpression",
+    "Workflow",
+    "WorkflowCallEvent",
+    "WorkflowCallInput",
+    "WorkflowCallInputType",
+    "WorkflowCallOutput",
+    "WorkflowCallSecret",
+    "WorkflowDispatchEvent",
+    "WorkflowDispatchInput",
+    "WorkflowDispatchInputType",
+    "WorkflowRunActivityType",
+    "WorkflowRunEvent",
+    "parse_workflow",
+    "parse_workflow_yaml",
 ]
 
 
@@ -186,8 +177,7 @@ class WorkflowCallInputType(str, Enum):
 
 
 class EventType(str, Enum):
-    """
-    GitHub events that can trigger workflows.
+    """GitHub events that can trigger workflows.
 
     Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/events-that-trigger-workflows
     """
@@ -234,12 +224,16 @@ class EventType(str, Enum):
 
 
 class BranchProtectionRuleActivityType(str, Enum):
+    """Activity types for branch_protection_rule events."""
+
     CREATED = "created"
     EDITED = "edited"
     DELETED = "deleted"
 
 
 class CheckRunActivityType(str, Enum):
+    """Activity types for check_run events."""
+
     CREATED = "created"
     REREQUESTED = "rerequested"
     COMPLETED = "completed"
@@ -247,12 +241,16 @@ class CheckRunActivityType(str, Enum):
 
 
 class CheckSuiteActivityType(str, Enum):
+    """Activity types for check_suite events."""
+
     COMPLETED = "completed"
     REQUESTED = "requested"
     REREQUESTED = "rerequested"
 
 
 class DiscussionActivityType(str, Enum):
+    """Activity types for discussion events."""
+
     CREATED = "created"
     EDITED = "edited"
     DELETED = "deleted"
@@ -269,18 +267,24 @@ class DiscussionActivityType(str, Enum):
 
 
 class DiscussionCommentActivityType(str, Enum):
+    """Activity types for discussion_comment events."""
+
     CREATED = "created"
     EDITED = "edited"
     DELETED = "deleted"
 
 
 class IssueCommentActivityType(str, Enum):
+    """Activity types for issue_comment events."""
+
     CREATED = "created"
     EDITED = "edited"
     DELETED = "deleted"
 
 
 class IssuesActivityType(str, Enum):
+    """Activity types for issues events."""
+
     OPENED = "opened"
     EDITED = "edited"
     DELETED = "deleted"
@@ -300,16 +304,22 @@ class IssuesActivityType(str, Enum):
 
 
 class LabelActivityType(str, Enum):
+    """Activity types for label events."""
+
     CREATED = "created"
     EDITED = "edited"
     DELETED = "deleted"
 
 
 class MergeGroupActivityType(str, Enum):
+    """Activity types for merge_group events."""
+
     CHECKS_REQUESTED = "checks_requested"
 
 
 class MilestoneActivityType(str, Enum):
+    """Activity types for milestone events."""
+
     CREATED = "created"
     CLOSED = "closed"
     OPENED = "opened"
@@ -318,6 +328,8 @@ class MilestoneActivityType(str, Enum):
 
 
 class ProjectActivityType(str, Enum):
+    """Activity types for project events."""
+
     CREATED = "created"
     UPDATED = "updated"
     CLOSED = "closed"
@@ -327,6 +339,8 @@ class ProjectActivityType(str, Enum):
 
 
 class ProjectCardActivityType(str, Enum):
+    """Activity types for project_card events."""
+
     CREATED = "created"
     MOVED = "moved"
     CONVERTED = "converted"
@@ -335,6 +349,8 @@ class ProjectCardActivityType(str, Enum):
 
 
 class ProjectColumnActivityType(str, Enum):
+    """Activity types for project_column events."""
+
     CREATED = "created"
     UPDATED = "updated"
     MOVED = "moved"
@@ -342,6 +358,8 @@ class ProjectColumnActivityType(str, Enum):
 
 
 class PullRequestActivityType(str, Enum):
+    """Activity types for pull_request events."""
+
     ASSIGNED = "assigned"
     UNASSIGNED = "unassigned"
     LABELED = "labeled"
@@ -366,6 +384,8 @@ class PullRequestActivityType(str, Enum):
 
 
 class PullRequestTargetActivityType(str, Enum):
+    """Activity types for pull_request_target events."""
+
     ASSIGNED = "assigned"
     UNASSIGNED = "unassigned"
     LABELED = "labeled"
@@ -386,23 +406,31 @@ class PullRequestTargetActivityType(str, Enum):
 
 
 class PullRequestReviewActivityType(str, Enum):
+    """Activity types for pull_request_review events."""
+
     SUBMITTED = "submitted"
     EDITED = "edited"
     DISMISSED = "dismissed"
 
 
 class PullRequestReviewCommentActivityType(str, Enum):
+    """Activity types for pull_request_review_comment events."""
+
     CREATED = "created"
     EDITED = "edited"
     DELETED = "deleted"
 
 
 class RegistryPackageActivityType(str, Enum):
+    """Activity types for registry_package events."""
+
     PUBLISHED = "published"
     UPDATED = "updated"
 
 
 class ReleaseActivityType(str, Enum):
+    """Activity types for release events."""
+
     PUBLISHED = "published"
     UNPUBLISHED = "unpublished"
     CREATED = "created"
@@ -413,6 +441,8 @@ class ReleaseActivityType(str, Enum):
 
 
 class WorkflowRunActivityType(str, Enum):
+    """Activity types for workflow_run events."""
+
     REQUESTED = "requested"
     COMPLETED = "completed"
     IN_PROGRESS = "in_progress"
@@ -428,9 +458,7 @@ Globs = Annotated[list[str], Field(min_length=1)]
 ExpressionSyntax = Annotated[str, Field(pattern=r"^\$\{\{(.|\r|\n)*\}\}$")]
 """GitHub Actions expression syntax: ${{ ... }}"""
 
-StringContainingExpression = Annotated[
-    str, Field(pattern=r"^.*\$\{\{(.|\r|\n)*\}\}.*$")
-]
+StringContainingExpression = Annotated[str, Field(pattern=r"^.*\$\{\{(.|\r|\n)*\}\}.*$")]
 """String containing GitHub Actions expression syntax."""
 
 JobName = Annotated[str, Field(pattern=r"^[_a-zA-Z][a-zA-Z0-9_-]*$")]
@@ -479,8 +507,7 @@ Reference: https://docs.github.com/en/actions/learn-github-actions/environment-v
 
 
 class Concurrency(StrictModel):
-    """
-    Concurrency configuration.
+    """Concurrency configuration.
 
     Concurrency ensures that only a single job or workflow using the same
     concurrency group will run at a time.
@@ -500,7 +527,10 @@ class Concurrency(StrictModel):
     cancel_in_progress: bool | ExpressionSyntax | None = Field(
         default=None,
         alias="cancel-in-progress",
-        description="To cancel any currently running job or workflow in the same concurrency group, specify cancel-in-progress: true.",
+        description=(
+            "To cancel any currently running job or workflow in the same concurrency group, "
+            "specify cancel-in-progress: true."
+        ),
     )
 
 
@@ -510,8 +540,7 @@ class Concurrency(StrictModel):
 
 
 class PermissionsEvent(StrictModel):
-    """
-    Fine-grained permissions for GITHUB_TOKEN.
+    """Fine-grained permissions for GITHUB_TOKEN.
 
     You can modify the default permissions granted to the GITHUB_TOKEN,
     adding or removing access as required, so that you only allow the
@@ -532,12 +561,8 @@ class PermissionsEvent(StrictModel):
     packages: PermissionLevel | None = None
     pages: PermissionLevel | None = None
     pull_requests: PermissionLevel | None = Field(default=None, alias="pull-requests")
-    repository_projects: PermissionLevel | None = Field(
-        default=None, alias="repository-projects"
-    )
-    security_events: PermissionLevel | None = Field(
-        default=None, alias="security-events"
-    )
+    repository_projects: PermissionLevel | None = Field(default=None, alias="repository-projects")
+    security_events: PermissionLevel | None = Field(default=None, alias="security-events")
     statuses: PermissionLevel | None = None
 
 
@@ -568,21 +593,22 @@ class DefaultsRun(StrictModel):
     working_directory: str | None = Field(
         default=None,
         alias="working-directory",
-        description="Using the working-directory keyword, you can specify the working directory of where to run the command.",
+        description=(
+            "Using the working-directory keyword, you can specify the working directory of where to run the command."
+        ),
     )
 
     @model_validator(mode="after")
     def check_at_least_one_property(self) -> DefaultsRun:
+        """Validate that at least one of shell or working-directory is specified."""
         if self.shell is None and self.working_directory is None:
-            raise ValueError(
-                "At least one of 'shell' or 'working-directory' must be specified"
-            )
+            msg = "At least one of 'shell' or 'working-directory' must be specified"
+            raise ValueError(msg)
         return self
 
 
 class Defaults(StrictModel):
-    """
-    Default settings that apply to all jobs/steps.
+    """Default settings that apply to all jobs/steps.
 
     Reference: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#defaults
     """
@@ -591,8 +617,10 @@ class Defaults(StrictModel):
 
     @model_validator(mode="after")
     def check_at_least_one_property(self) -> Defaults:
+        """Validate that at least one property is specified in defaults."""
         if self.run is None:
-            raise ValueError("At least one property must be specified in defaults")
+            msg = "At least one property must be specified in defaults"
+            raise ValueError(msg)
         return self
 
 
@@ -609,15 +637,17 @@ class ContainerCredentials(BaseModel):
 
 
 class Container(StrictModel):
-    """
-    Container configuration for running jobs.
+    """Container configuration for running jobs.
 
     Reference: https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions#jobsjob_idcontainer
     """
 
     image: str = Field(
         ...,
-        description="The Docker image to use as the container to run the action. The value can be the Docker Hub image name or a registry name.",
+        description=(
+            "The Docker image to use as the container to run the action. "
+            "The value can be the Docker Hub image name or a registry name."
+        ),
     )
     credentials: ContainerCredentials | None = Field(
         default=None,
@@ -662,8 +692,7 @@ class Container(StrictModel):
 
 
 class Environment(StrictModel):
-    """
-    The environment that the job references.
+    """The environment that the job references.
 
     Reference: https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idenvironment
     """
@@ -684,8 +713,7 @@ class Environment(StrictModel):
 
 
 class Step(StrictModel):
-    """
-    A single step in a job.
+    """A single step in a job.
 
     Steps can run commands, run setup tasks, or run an action in your repository,
     a public repository, or an action published in a Docker registry.
@@ -750,11 +778,15 @@ class Step(StrictModel):
     working_directory: str | None = Field(
         default=None,
         alias="working-directory",
-        description="Using the working-directory keyword, you can specify the working directory of where to run the command.",
+        description=(
+            "Using the working-directory keyword, you can specify the working directory of where to run the command."
+        ),
     )
     shell: str | ShellType | None = Field(
         default=None,
-        description="You can override the default shell settings in the runner's operating system using the shell keyword.",
+        description=(
+            "You can override the default shell settings in the runner's operating system using the shell keyword."
+        ),
     )
     with_: EnvMapping | None = Field(
         default=None,
@@ -775,7 +807,9 @@ class Step(StrictModel):
     continue_on_error: bool | ExpressionSyntax = Field(
         default=False,
         alias="continue-on-error",
-        description="Prevents a job from failing when a step fails. Set to true to allow a job to pass when this step fails.",
+        description=(
+            "Prevents a job from failing when a step fails. Set to true to allow a job to pass when this step fails."
+        ),
     )
     timeout_minutes: int | float | ExpressionSyntax | None = Field(
         default=None,
@@ -785,19 +819,25 @@ class Step(StrictModel):
 
     @model_validator(mode="after")
     def check_uses_or_run(self) -> Step:
+        """Validate that step has either uses or run but not both."""
         if self.uses is None and self.run is None:
-            raise ValueError("Step must contain either 'uses' or 'run'")
+            msg = "Step must contain either 'uses' or 'run'"
+            raise ValueError(msg)
         if self.uses is not None and self.run is not None:
-            raise ValueError("Step cannot contain both 'uses' and 'run'")
+            msg = "Step cannot contain both 'uses' and 'run'"
+            raise ValueError(msg)
         return self
 
     @model_validator(mode="after")
     def check_run_dependencies(self) -> Step:
+        """Validate that shell and working-directory are only used with run."""
         if self.run is None:
             if self.working_directory is not None:
-                raise ValueError("'working-directory' requires 'run' to be specified")
+                msg = "'working-directory' requires 'run' to be specified"
+                raise ValueError(msg)
             if self.shell is not None:
-                raise ValueError("'shell' requires 'run' to be specified")
+                msg = "'shell' requires 'run' to be specified"
+                raise ValueError(msg)
         return self
 
 
@@ -813,8 +853,7 @@ MatrixIncludeExclude = ExpressionSyntax | list[dict[str, Configuration]]
 
 
 class Matrix(FlexibleModel):
-    """
-    Build matrix configuration.
+    """Build matrix configuration.
 
     A build matrix is a set of different configurations of the virtual environment.
     For example you might run a job against more than one supported version of a language,
@@ -830,8 +869,7 @@ class Matrix(FlexibleModel):
 
 
 class Strategy(StrictModel):
-    """
-    Strategy configuration for a job.
+    """Strategy configuration for a job.
 
     A strategy creates a build matrix for your jobs. You can define different
     variations of an environment to run each job in.
@@ -902,8 +940,7 @@ Reference: https://help.github.com/en/github/automating-your-workflow-with-githu
 
 
 class NormalJob(StrictModel):
-    """
-    Standard job definition.
+    """Standard job definition.
 
     Each job must have an id to associate with the job. The key job_id is a string
     and its value is a map of the job's configuration data. You must replace <job_id>
@@ -931,8 +968,7 @@ class NormalJob(StrictModel):
     outputs: dict[str, str] | None = Field(
         default=None,
         description=(
-            "A map of outputs for a job. Job outputs are available to all downstream "
-            "jobs that depend on this job."
+            "A map of outputs for a job. Job outputs are available to all downstream jobs that depend on this job."
         ),
     )
     env: EnvMapping | None = Field(
@@ -959,7 +995,9 @@ class NormalJob(StrictModel):
     timeout_minutes: int | float | ExpressionSyntax = Field(
         default=360,
         alias="timeout-minutes",
-        description="The maximum number of minutes to let a workflow run before GitHub automatically cancels it. Default: 360",
+        description=(
+            "The maximum number of minutes to let a workflow run before GitHub automatically cancels it. Default: 360"
+        ),
     )
     strategy: Strategy | None = Field(
         default=None,
@@ -968,7 +1006,10 @@ class NormalJob(StrictModel):
     continue_on_error: bool | ExpressionSyntax | None = Field(
         default=None,
         alias="continue-on-error",
-        description="Prevents a workflow run from failing when a job fails. Set to true to allow a workflow run to pass when this job fails.",
+        description=(
+            "Prevents a workflow run from failing when a job fails. "
+            "Set to true to allow a workflow run to pass when this job fails."
+        ),
     )
     container: str | Container | None = Field(
         default=None,
@@ -987,13 +1028,15 @@ class NormalJob(StrictModel):
     )
     concurrency: str | Concurrency | None = Field(
         default=None,
-        description="Concurrency ensures that only a single job or workflow using the same concurrency group will run at a time.",
+        description=(
+            "Concurrency ensures that only a single job or workflow using the same concurrency group "
+            "will run at a time."
+        ),
     )
 
 
 class ReusableWorkflowCallJob(StrictModel):
-    """
-    Job that calls a reusable workflow.
+    """Job that calls a reusable workflow.
 
     Reference: https://docs.github.com/en/actions/learn-github-actions/reusing-workflows#calling-a-reusable-workflow
     """
@@ -1043,7 +1086,10 @@ class ReusableWorkflowCallJob(StrictModel):
     )
     concurrency: str | Concurrency | None = Field(
         default=None,
-        description="Concurrency ensures that only a single job or workflow using the same concurrency group will run at a time.",
+        description=(
+            "Concurrency ensures that only a single job or workflow using the same concurrency group "
+            "will run at a time."
+        ),
     )
 
 
@@ -1057,8 +1103,7 @@ Job = NormalJob | ReusableWorkflowCallJob
 
 
 class WorkflowDispatchInput(StrictModel):
-    """
-    Input parameter for workflow_dispatch event.
+    """Input parameter for workflow_dispatch event.
 
     Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/metadata-syntax-for-github-actions#inputsinput_id
     """
@@ -1091,8 +1136,10 @@ class WorkflowDispatchInput(StrictModel):
 
     @model_validator(mode="after")
     def validate_type_constraints(self) -> WorkflowDispatchInput:
+        """Validate that options are provided when type is choice."""
         if self.type == WorkflowDispatchInputType.CHOICE and self.options is None:
-            raise ValueError("'options' is required when type is 'choice'")
+            msg = "'options' is required when type is 'choice'"
+            raise ValueError(msg)
         return self
 
 
@@ -1158,22 +1205,18 @@ class WorkflowCallSecret(StrictModel):
 
 
 class BranchProtectionRuleEvent(FlexibleModel):
-    """
-    Branch protection rule event configuration.
+    """Branch protection rule event configuration.
 
     Runs your workflow anytime the branch_protection_rule event occurs.
 
     Reference: https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows#branch_protection_rule
     """
 
-    types: (
-        list[BranchProtectionRuleActivityType] | BranchProtectionRuleActivityType | None
-    ) = None
+    types: list[BranchProtectionRuleActivityType] | BranchProtectionRuleActivityType | None = None
 
 
 class CheckRunEvent(FlexibleModel):
-    """
-    Check run event configuration.
+    """Check run event configuration.
 
     Runs your workflow anytime the check_run event occurs.
 
@@ -1184,8 +1227,7 @@ class CheckRunEvent(FlexibleModel):
 
 
 class CheckSuiteEvent(FlexibleModel):
-    """
-    Check suite event configuration.
+    """Check suite event configuration.
 
     Runs your workflow anytime the check_suite event occurs.
 
@@ -1196,8 +1238,7 @@ class CheckSuiteEvent(FlexibleModel):
 
 
 class DiscussionEvent(FlexibleModel):
-    """
-    Discussion event configuration.
+    """Discussion event configuration.
 
     Runs your workflow anytime the discussion event occurs.
 
@@ -1208,20 +1249,16 @@ class DiscussionEvent(FlexibleModel):
 
 
 class DiscussionCommentEvent(FlexibleModel):
-    """
-    Discussion comment event configuration.
+    """Discussion comment event configuration.
 
     Reference: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#discussion_comment
     """
 
-    types: (
-        list[DiscussionCommentActivityType] | DiscussionCommentActivityType | None
-    ) = None
+    types: list[DiscussionCommentActivityType] | DiscussionCommentActivityType | None = None
 
 
 class IssueCommentEvent(FlexibleModel):
-    """
-    Issue comment event configuration.
+    """Issue comment event configuration.
 
     Runs your workflow anytime the issue_comment event occurs.
 
@@ -1232,8 +1269,7 @@ class IssueCommentEvent(FlexibleModel):
 
 
 class IssuesEvent(FlexibleModel):
-    """
-    Issues event configuration.
+    """Issues event configuration.
 
     Runs your workflow anytime the issues event occurs.
 
@@ -1244,8 +1280,7 @@ class IssuesEvent(FlexibleModel):
 
 
 class LabelEvent(FlexibleModel):
-    """
-    Label event configuration.
+    """Label event configuration.
 
     Runs your workflow anytime the label event occurs.
 
@@ -1256,8 +1291,7 @@ class LabelEvent(FlexibleModel):
 
 
 class MergeGroupEvent(FlexibleModel):
-    """
-    Merge group event configuration.
+    """Merge group event configuration.
 
     Runs your workflow when a pull request is added to a merge queue.
 
@@ -1268,8 +1302,7 @@ class MergeGroupEvent(FlexibleModel):
 
 
 class MilestoneEvent(FlexibleModel):
-    """
-    Milestone event configuration.
+    """Milestone event configuration.
 
     Runs your workflow anytime the milestone event occurs.
 
@@ -1280,8 +1313,7 @@ class MilestoneEvent(FlexibleModel):
 
 
 class ProjectEvent(FlexibleModel):
-    """
-    Project event configuration.
+    """Project event configuration.
 
     Runs your workflow anytime the project event occurs.
 
@@ -1292,8 +1324,7 @@ class ProjectEvent(FlexibleModel):
 
 
 class ProjectCardEvent(FlexibleModel):
-    """
-    Project card event configuration.
+    """Project card event configuration.
 
     Runs your workflow anytime the project_card event occurs.
 
@@ -1304,8 +1335,7 @@ class ProjectCardEvent(FlexibleModel):
 
 
 class ProjectColumnEvent(FlexibleModel):
-    """
-    Project column event configuration.
+    """Project column event configuration.
 
     Runs your workflow anytime the project_column event occurs.
 
@@ -1316,8 +1346,7 @@ class ProjectColumnEvent(FlexibleModel):
 
 
 class PullRequestEvent(StrictModel):
-    """
-    Pull request event configuration.
+    """Pull request event configuration.
 
     Runs your workflow anytime the pull_request event occurs.
 
@@ -1358,18 +1387,21 @@ class PullRequestEvent(StrictModel):
 
     @model_validator(mode="after")
     def check_filter_exclusivity(self) -> PullRequestEvent:
+        """Validate that inclusive and exclusive filters are not used together."""
         if self.branches is not None and self.branches_ignore is not None:
-            raise ValueError("Cannot use both 'branches' and 'branches-ignore'")
+            msg = "Cannot use both 'branches' and 'branches-ignore'"
+            raise ValueError(msg)
         if self.tags is not None and self.tags_ignore is not None:
-            raise ValueError("Cannot use both 'tags' and 'tags-ignore'")
+            msg = "Cannot use both 'tags' and 'tags-ignore'"
+            raise ValueError(msg)
         if self.paths is not None and self.paths_ignore is not None:
-            raise ValueError("Cannot use both 'paths' and 'paths-ignore'")
+            msg = "Cannot use both 'paths' and 'paths-ignore'"
+            raise ValueError(msg)
         return self
 
 
 class PullRequestTargetEvent(StrictModel):
-    """
-    Pull request target event configuration.
+    """Pull request target event configuration.
 
     This event is similar to pull_request, except that it runs in the context
     of the base repository of the pull request, rather than in the merge commit.
@@ -1377,9 +1409,7 @@ class PullRequestTargetEvent(StrictModel):
     Reference: https://docs.github.com/en/actions/reference/events-that-trigger-workflows#pull_request_target
     """
 
-    types: (
-        list[PullRequestTargetActivityType] | PullRequestTargetActivityType | None
-    ) = None
+    types: list[PullRequestTargetActivityType] | PullRequestTargetActivityType | None = None
     branches: Globs | None = None
     branches_ignore: Globs | None = Field(default=None, alias="branches-ignore")
     tags: Globs | None = None
@@ -1389,48 +1419,43 @@ class PullRequestTargetEvent(StrictModel):
 
     @model_validator(mode="after")
     def check_filter_exclusivity(self) -> PullRequestTargetEvent:
+        """Validate that inclusive and exclusive filters are not used together."""
         if self.branches is not None and self.branches_ignore is not None:
-            raise ValueError("Cannot use both 'branches' and 'branches-ignore'")
+            msg = "Cannot use both 'branches' and 'branches-ignore'"
+            raise ValueError(msg)
         if self.tags is not None and self.tags_ignore is not None:
-            raise ValueError("Cannot use both 'tags' and 'tags-ignore'")
+            msg = "Cannot use both 'tags' and 'tags-ignore'"
+            raise ValueError(msg)
         if self.paths is not None and self.paths_ignore is not None:
-            raise ValueError("Cannot use both 'paths' and 'paths-ignore'")
+            msg = "Cannot use both 'paths' and 'paths-ignore'"
+            raise ValueError(msg)
         return self
 
 
 class PullRequestReviewEvent(FlexibleModel):
-    """
-    Pull request review event configuration.
+    """Pull request review event configuration.
 
     Runs your workflow anytime the pull_request_review event occurs.
 
     Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/events-that-trigger-workflows#pull-request-review-event-pull_request_review
     """
 
-    types: (
-        list[PullRequestReviewActivityType] | PullRequestReviewActivityType | None
-    ) = None
+    types: list[PullRequestReviewActivityType] | PullRequestReviewActivityType | None = None
 
 
 class PullRequestReviewCommentEvent(FlexibleModel):
-    """
-    Pull request review comment event configuration.
+    """Pull request review comment event configuration.
 
     Runs your workflow anytime a comment on a pull request's unified diff is modified.
 
     Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/events-that-trigger-workflows#pull-request-review-comment-event-pull_request_review_comment
     """
 
-    types: (
-        list[PullRequestReviewCommentActivityType]
-        | PullRequestReviewCommentActivityType
-        | None
-    ) = None
+    types: list[PullRequestReviewCommentActivityType] | PullRequestReviewCommentActivityType | None = None
 
 
 class PushEvent(StrictModel):
-    """
-    Push event configuration.
+    """Push event configuration.
 
     Runs your workflow when someone pushes to a repository branch.
 
@@ -1446,18 +1471,21 @@ class PushEvent(StrictModel):
 
     @model_validator(mode="after")
     def check_filter_exclusivity(self) -> PushEvent:
+        """Validate that inclusive and exclusive filters are not used together."""
         if self.branches is not None and self.branches_ignore is not None:
-            raise ValueError("Cannot use both 'branches' and 'branches-ignore'")
+            msg = "Cannot use both 'branches' and 'branches-ignore'"
+            raise ValueError(msg)
         if self.tags is not None and self.tags_ignore is not None:
-            raise ValueError("Cannot use both 'tags' and 'tags-ignore'")
+            msg = "Cannot use both 'tags' and 'tags-ignore'"
+            raise ValueError(msg)
         if self.paths is not None and self.paths_ignore is not None:
-            raise ValueError("Cannot use both 'paths' and 'paths-ignore'")
+            msg = "Cannot use both 'paths' and 'paths-ignore'"
+            raise ValueError(msg)
         return self
 
 
 class RegistryPackageEvent(FlexibleModel):
-    """
-    Registry package event configuration.
+    """Registry package event configuration.
 
     Runs your workflow anytime a package is published or updated.
 
@@ -1468,8 +1496,7 @@ class RegistryPackageEvent(FlexibleModel):
 
 
 class ReleaseEvent(FlexibleModel):
-    """
-    Release event configuration.
+    """Release event configuration.
 
     Runs your workflow anytime the release event occurs.
 
@@ -1489,8 +1516,7 @@ class ScheduleItem(StrictModel):
 
 
 class WorkflowCallEvent(BaseModel):
-    """
-    Workflow call event configuration.
+    """Workflow call event configuration.
 
     Allows workflows to be reused by other workflows.
 
@@ -1512,8 +1538,7 @@ class WorkflowCallEvent(BaseModel):
 
 
 class WorkflowDispatchEvent(StrictModel):
-    """
-    Workflow dispatch event configuration.
+    """Workflow dispatch event configuration.
 
     You can now create workflows that are manually triggered with the new
     workflow_dispatch event. You will then see a 'Run workflow' button on
@@ -1533,8 +1558,7 @@ class WorkflowDispatchEvent(StrictModel):
 
 
 class WorkflowRunEvent(FlexibleModel):
-    """
-    Workflow run event configuration.
+    """Workflow run event configuration.
 
     This event occurs when a workflow run is requested or completed, and allows
     you to execute a workflow based on the finished result of another workflow.
@@ -1557,8 +1581,7 @@ class WorkflowRunEvent(FlexibleModel):
 
 
 class OnConfiguration(StrictModel):
-    """
-    Complete event trigger configuration.
+    """Complete event trigger configuration.
 
     The name of the GitHub event that triggers the workflow. You can provide
     a single event string, array of events, array of event types, or an event
@@ -1661,8 +1684,7 @@ Can be a single event, list of events, or detailed event configuration.
 
 
 class Workflow(StrictModel):
-    """
-    GitHub Actions Workflow definition.
+    """GitHub Actions Workflow definition.
 
     A workflow is a configurable automated process made up of one or more jobs.
     You must create a YAML file to define your workflow configuration.
@@ -1721,8 +1743,7 @@ class Workflow(StrictModel):
     permissions: Permissions | None = Field(
         default=None,
         description=(
-            "You can modify the default permissions granted to the GITHUB_TOKEN, "
-            "adding or removing access as required."
+            "You can modify the default permissions granted to the GITHUB_TOKEN, adding or removing access as required."
         ),
     )
 
@@ -1730,14 +1751,15 @@ class Workflow(StrictModel):
     @classmethod
     def validate_job_ids(cls, v: dict[str, Job]) -> dict[str, Job]:
         """Validate that job IDs match the required pattern."""
-        import re
-
         pattern = re.compile(r"^[_a-zA-Z][a-zA-Z0-9_-]*$")
         for job_id in v:
             if not pattern.match(job_id):
-                raise ValueError(
+                msg = (
                     f"Invalid job ID '{job_id}': must start with a letter or underscore "
                     "and contain only alphanumeric characters, dashes, or underscores"
+                )
+                raise ValueError(
+                    msg,
                 )
         return v
 
@@ -1748,8 +1770,7 @@ class Workflow(StrictModel):
 
 
 def parse_workflow(data: dict[str, Any]) -> Workflow:
-    """
-    Parse a workflow dictionary into a Workflow model.
+    """Parse a workflow dictionary into a Workflow model.
 
     Args:
         data: Dictionary representation of a GitHub Actions workflow
@@ -1759,13 +1780,13 @@ def parse_workflow(data: dict[str, Any]) -> Workflow:
 
     Raises:
         pydantic.ValidationError: If the workflow data is invalid
+
     """
     return Workflow.model_validate(data)
 
 
 def parse_workflow_yaml(yaml_content: str) -> Workflow:
-    """
-    Parse a YAML string into a Workflow model.
+    """Parse a YAML string into a Workflow model.
 
     Args:
         yaml_content: YAML string representation of a GitHub Actions workflow
@@ -1780,9 +1801,8 @@ def parse_workflow_yaml(yaml_content: str) -> Workflow:
     Note:
         Requires PyYAML to be installed.
         Handles the YAML 1.1 quirk where 'on' is parsed as boolean True.
-    """
-    import yaml
 
+    """
     data = yaml.safe_load(yaml_content)
 
     # Handle YAML 1.1 quirk: 'on' key is parsed as boolean True

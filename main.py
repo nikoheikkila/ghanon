@@ -1,5 +1,8 @@
-def main():
-    print("Hello from ghanon!")
+"""Entry point for ghanon command-line interface."""
+
+
+def main() -> None:
+    """Run the ghanon CLI."""
 
 
 if __name__ == "__main__":
