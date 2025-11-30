@@ -39,7 +39,7 @@ from ghanon.models.workflow import (
 )
 
 
-class TestActivityTypeEvents:
+class TestActivityTypeEvent:
     @pytest.mark.parametrize(
         ("event_class", "types"),
         [
