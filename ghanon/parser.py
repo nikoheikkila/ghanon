@@ -52,7 +52,7 @@ def parse_workflow_yaml(yaml_content: str) -> Workflow:
 
     # Handle YAML 1.1 quirk: 'on' key is parsed as boolean True
     # This is a known issue with GitHub Actions workflows
-    if isinstance(data, dict) and True in data and "on" not in data:
+    if True in data:
         data["on"] = data.pop(True)
 
     return parse_workflow(data)
