@@ -11,6 +11,7 @@ from typing import Annotated
 from pydantic import BaseModel, Field, model_validator
 
 from .base import FlexibleModel, StrictModel
+from .types import Globs
 
 __all__ = [
     "BranchProtectionRuleActivityType",
@@ -65,14 +66,6 @@ __all__ = [
     "WorkflowRunActivityType",
     "WorkflowRunEvent",
 ]
-
-
-# =============================================================================
-# Type Aliases
-# =============================================================================
-
-Globs = Annotated[list[str], Field(min_length=1)]
-"""Array of glob patterns with at least one item."""
 
 
 # =============================================================================
