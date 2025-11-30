@@ -1,53 +1,69 @@
-"""Tests for ReusableWorkflowCallJob model."""
-
+import pytest
 from assertpy import assert_that
 
+from ghanon.models.jobs import Matrix, Strategy
 from ghanon.models.workflow import ReusableWorkflowCallJob
 
 
+@pytest.fixture
+def minimal_config():
+    """Provide a minimal configuration for a reusable workflow call job."""
+    return {
+        "uses": "owner/repo/.github/workflows/workflow.yml@main",
+    }
+
+
 class TestReusableWorkflowCallJob:
-    """Tests for ReusableWorkflowCallJob model."""
+    def test_minimal(self, minimal_config):
+        job = ReusableWorkflowCallJob.model_validate(
+            minimal_config,
+        )
+        assert_that(job.uses).is_equal_to(minimal_config["uses"])
 
-    def test_minimal(self):
+    def test_with_inputs(self, minimal_config):
+        environment = "production"
+
         job = ReusableWorkflowCallJob.model_validate(
             {
-                "uses": "owner/repo/.github/workflows/workflow.yml@main",
+                **minimal_config,
+                "with": {"environment": environment},
             },
         )
-        assert_that(job.uses).contains("workflow.yml")
 
-    def test_with_inputs(self):
+        assert_that(job.with_).contains_entry({"environment": environment})
+
+    def test_secrets_inherit_raises_validation_error(self, minimal_config):
+        with pytest.raises(ValueError, match="do not use 'secrets: inherit' as it can be insecure"):
+            ReusableWorkflowCallJob.model_validate(
+                {
+                    **minimal_config,
+                    "secrets": "inherit",
+                },
+            )
+
+    def test_secrets_explicit(self, minimal_config):
+        value = "${{ secrets.API_KEY }}"
+        key = "API_KEY"
+
         job = ReusableWorkflowCallJob.model_validate(
             {
-                "uses": "owner/repo/.github/workflows/workflow.yml@v1",
-                "with": {"environment": "production", "debug": True},
+                **minimal_config,
+                "secrets": {key: value},
             },
         )
-        assert_that(job.with_).contains_entry({"environment": "production"})
 
-    def test_secrets_inherit(self):
+        assert_that(job.secrets).contains_entry({key: value})
+
+    def test_with_strategy(self, minimal_config):
+        matrix = {"env": ["dev", "staging"]}
+
         job = ReusableWorkflowCallJob.model_validate(
             {
-                "uses": "owner/repo/.github/workflows/workflow.yml@main",
-                "secrets": "inherit",
+                **minimal_config,
+                "strategy": {"matrix": matrix},
             },
         )
-        assert_that(job.secrets).is_equal_to("inherit")
 
-    def test_secrets_explicit(self):
-        job = ReusableWorkflowCallJob.model_validate(
-            {
-                "uses": "owner/repo/.github/workflows/workflow.yml@main",
-                "secrets": {"API_KEY": "${{ secrets.API_KEY }}"},
-            },
-        )
-        assert_that(job.secrets).contains_key("API_KEY")
-
-    def test_with_strategy(self):
-        job = ReusableWorkflowCallJob.model_validate(
-            {
-                "uses": "./.github/workflows/reusable.yml",
-                "strategy": {"matrix": {"env": ["dev", "staging"]}},
-            },
-        )
-        assert_that(job.strategy).is_not_none()
+        assert isinstance(job.strategy, Strategy)
+        assert isinstance(job.strategy.matrix, Matrix)
+        assert_that(job.strategy.matrix.model_dump()).contains_entry(matrix)
