@@ -1,67 +1,79 @@
-"""Tests for Step model."""
-
 import pytest
 from assertpy import assert_that
 from pydantic import ValidationError
 
 from ghanon.models.workflow import Step
 
+command = "echo hello"
+uses = "actions/checkout@v4"
+
 
 class TestStep:
-    """Tests for Step model."""
-
     def test_run_only(self):
-        step = Step.model_validate({"run": "echo hello"})
-        assert_that(step.run).is_equal_to("echo hello")
+        step = Step.model_validate({"run": command})
+        assert_that(step.run).is_equal_to(command)
 
     def test_uses_only(self):
-        step = Step.model_validate({"uses": "actions/checkout@v4"})
-        assert_that(step.uses).is_equal_to("actions/checkout@v4")
+        step = Step.model_validate({"uses": uses})
+        assert_that(step.uses).is_equal_to(uses)
 
     def test_requires_uses_or_run(self):
         assert_that(Step.model_validate).raises(ValidationError).when_called_with({"name": "Invalid"})
 
     def test_cannot_have_both(self):
         assert_that(Step.model_validate).raises(ValidationError).when_called_with(
-            {"uses": "actions/checkout@v4", "run": "echo"},
+            {"uses": uses, "run": command},
         )
 
     def test_id(self):
-        step = Step.model_validate({"id": "my-step", "run": "echo"})
-        assert_that(step.id).is_equal_to("my-step")
+        identifier = "my-step"
+        step = Step.model_validate({"id": identifier, "run": command})
+        assert_that(step.id).is_equal_to(identifier)
 
     def test_name(self):
-        step = Step.model_validate({"name": "Build", "run": "npm run build"})
-        assert_that(step.name).is_equal_to("Build")
+        name = "Build"
+        step = Step.model_validate({"name": name, "run": command})
+        assert_that(step.name).is_equal_to(name)
 
     def test_if_string(self):
-        step = Step.model_validate({"run": "echo", "if": "success()"})
-        assert_that(step.if_).is_equal_to("success()")
+        condition = "success()"
+        step = Step.model_validate({"run": command, "if": condition})
+        assert_that(step.if_).is_equal_to(condition)
 
-    def test_if_boolean(self):
-        step = Step.model_validate({"run": "echo", "if": True})
+    def test_if_true(self):
+        step = Step.model_validate({"run": command, "if": True})
         assert_that(step.if_).is_true()
 
+    def test_if_false(self):
+        step = Step.model_validate({"run": command, "if": False})
+        assert_that(step.if_).is_false()
+
     def test_with(self):
+        options = {"node-version": "24", "cache": "npm"}
+
         step = Step.model_validate(
             {
                 "uses": "actions/setup-node@v4",
-                "with": {"node-version": "18", "cache": "npm"},
+                "with": options,
             },
         )
-        assert_that(step.with_).contains_entry({"node-version": "18"})
+
+        assert_that(step.with_).is_equal_to(options)
 
     def test_env(self):
-        step = Step.model_validate({"run": "echo $VAR", "env": {"VAR": "value"}})
-        assert_that(step.env).contains_entry({"VAR": "value"})
+        environment = {"VAR": "value"}
+        step = Step.model_validate({"run": command, "env": environment})
+        assert_that(step.env).is_equal_to(environment)
 
     def test_shell(self):
-        step = Step.model_validate({"run": "echo", "shell": "bash"})
-        assert_that(step.shell).is_equal_to("bash")
+        shell = "bash"
+        step = Step.model_validate({"run": command, "shell": shell})
+        assert_that(step.shell).is_equal_to(shell)
 
     def test_working_directory(self):
-        step = Step.model_validate({"run": "echo", "working-directory": "./app"})
-        assert_that(step.working_directory).is_equal_to("./app")
+        working_directory = "./app"
+        step = Step.model_validate({"run": command, "working-directory": working_directory})
+        assert_that(step.working_directory).is_equal_to(working_directory)
 
     def test_shell_requires_run(self):
         assert_that(Step.model_validate).raises(ValidationError).when_called_with(
@@ -73,13 +85,18 @@ class TestStep:
             {"uses": "actions/checkout@v4", "working-directory": "./app"},
         )
 
-    def test_continue_on_error(self):
+    def test_continue_on_error_true(self):
         step = Step.model_validate({"run": "echo", "continue-on-error": True})
         assert_that(step.continue_on_error).is_true()
 
+    def test_continue_on_error_false(self):
+        step = Step.model_validate({"run": "echo", "continue-on-error": False})
+        assert_that(step.continue_on_error).is_false()
+
     def test_timeout_minutes(self):
-        step = Step.model_validate({"run": "long-task", "timeout-minutes": 60})
-        assert_that(step.timeout_minutes).is_equal_to(60)
+        timeout = 60
+        step = Step.model_validate({"run": "long-task", "timeout-minutes": timeout})
+        assert_that(step.timeout_minutes).is_equal_to(timeout)
 
     def test_multiline_run(self):
         step = Step.model_validate(
