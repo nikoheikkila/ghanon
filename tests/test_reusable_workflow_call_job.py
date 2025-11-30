@@ -1,7 +1,7 @@
 import pytest
 from assertpy import assert_that
 
-from ghanon.models.jobs import Matrix, Strategy
+from ghanon.models.matrix import Matrix, Strategy
 from ghanon.models.workflow import ReusableWorkflowCallJob
 
 

@@ -6,7 +6,7 @@ import pytest
 from assertpy import assert_that
 from pydantic import ValidationError
 
-from ghanon.models.jobs import Strategy
+from ghanon.models.matrix import Strategy
 from ghanon.models.workflow import (
     Concurrency,
     EventType,

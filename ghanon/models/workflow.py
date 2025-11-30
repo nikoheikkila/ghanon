@@ -70,17 +70,19 @@ from .events import (
     WorkflowRunEvent,
 )
 from .jobs import (
-    Configuration,
     Job,
     JobName,
     JobNeeds,
-    Matrix,
-    MatrixIncludeExclude,
     NormalJob,
     ReusableWorkflowCallJob,
     RunnerGroup,
     RunsOn,
     Step,
+)
+from .matrix import (
+    Configuration,
+    Matrix,
+    MatrixIncludeExclude,
     Strategy,
 )
 from .permissions import (
