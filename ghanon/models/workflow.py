@@ -88,7 +88,16 @@ from .permissions import (
     PermissionsEvent,
 )
 from .runner import RunnerGroup, RunsOn
-from .types import Configuration, JobName, JobNeeds, MatrixIncludeExclude
+from .types import (
+    Configuration,
+    EnvMapping,
+    EnvVarValue,
+    ExpressionSyntax,
+    JobName,
+    JobNeeds,
+    MatrixIncludeExclude,
+    StringContainingExpression,
+)
 
 __all__ = [
     "Architecture",
@@ -180,33 +189,8 @@ __all__ = [
 
 
 # =============================================================================
-# Type Aliases
+# On (Triggers) Configuration
 # =============================================================================
-
-ExpressionSyntax = Annotated[str, Field(pattern=r"^\$\{\{(.|\r|\n)*\}\}$")]
-"""GitHub Actions expression syntax: ${{ ... }}"""
-
-StringContainingExpression = Annotated[str, Field(pattern=r"^.*\$\{\{(.|\r|\n)*\}\}.*$")]
-"""String containing GitHub Actions expression syntax."""
-
-
-# =============================================================================
-# Environment Variables
-# =============================================================================
-
-EnvVarValue = str | int | float | bool
-"""Valid types for environment variable values."""
-
-EnvMapping = dict[str, EnvVarValue] | StringContainingExpression
-"""
-Environment variables mapping.
-
-To set custom environment variables, you need to specify the variables in the workflow file.
-You can define environment variables for a step, job, or entire workflow using the
-jobs.<job_id>.steps[*].env, jobs.<job_id>.env, and env keywords.
-
-Reference: https://docs.github.com/en/actions/learn-github-actions/environment-variables
-"""
 
 
 # =============================================================================
