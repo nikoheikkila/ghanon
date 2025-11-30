@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 
 from .base import StrictModel
 from .concurrency import Concurrency
@@ -12,40 +12,17 @@ from .container import Container
 from .defaults import Defaults
 from .environment import Environment
 from .matrix import Strategy
+from .runner import RunsOn
 from .step import Step
-from .types import EnvMapping, ExpressionSyntax, JobName, StringContainingExpression
+from .types import EnvMapping, ExpressionSyntax, JobName
 
 __all__ = [
     "Job",
     "JobNeeds",
     "NormalJob",
     "ReusableWorkflowCallJob",
-    "RunnerGroup",
-    "RunsOn",
     "Step",
 ]
-
-
-# =============================================================================
-# Runner Configuration
-# =============================================================================
-
-
-class RunnerGroup(BaseModel):
-    """Runner group configuration for choosing runners in a group."""
-
-    group: str | None = None
-    labels: str | list[str] | None = None
-
-
-RunsOn = str | list[str] | RunnerGroup | StringContainingExpression | ExpressionSyntax
-"""
-The type of machine to run the job on.
-
-The machine can be either a GitHub-hosted runner or a self-hosted runner.
-
-Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions#jobsjob_idruns-on
-"""
 
 
 # =============================================================================

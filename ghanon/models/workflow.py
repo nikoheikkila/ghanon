@@ -76,8 +76,6 @@ from .jobs import (
     JobNeeds,
     NormalJob,
     ReusableWorkflowCallJob,
-    RunnerGroup,
-    RunsOn,
     Step,
 )
 from .matrix import (
@@ -93,6 +91,7 @@ from .permissions import (
     Permissions,
     PermissionsEvent,
 )
+from .runner import RunnerGroup, RunsOn
 
 __all__ = [
     "Architecture",
