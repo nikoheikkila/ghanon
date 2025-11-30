@@ -13,9 +13,9 @@ from pydantic import Field, field_validator
 
 from .base import StrictModel
 from .concurrency import Concurrency
-from .container import Container, ContainerCredentials
-from .defaults import Defaults, DefaultsRun, ShellType
-from .enums import Architecture, EventType, Machine
+from .container import Container
+from .defaults import Defaults, DefaultsRun
+from .enums import EventType
 from .environment import Environment
 from .events import (
     BranchProtectionRuleActivityType,
@@ -28,7 +28,6 @@ from .events import (
     DiscussionCommentActivityType,
     DiscussionCommentEvent,
     DiscussionEvent,
-    Globs,
     IssueCommentActivityType,
     IssueCommentEvent,
     IssuesActivityType,
@@ -51,7 +50,6 @@ from .events import (
     PullRequestReviewCommentActivityType,
     PullRequestReviewCommentEvent,
     PullRequestReviewEvent,
-    PullRequestTargetActivityType,
     PullRequestTargetEvent,
     PushEvent,
     RegistryPackageActivityType,
@@ -60,10 +58,7 @@ from .events import (
     ReleaseEvent,
     ScheduleItem,
     WorkflowCallEvent,
-    WorkflowCallInput,
     WorkflowCallInputType,
-    WorkflowCallOutput,
-    WorkflowCallSecret,
     WorkflowDispatchEvent,
     WorkflowDispatchInput,
     WorkflowDispatchInputType,
@@ -81,27 +76,16 @@ from .matrix import (
     Strategy,
 )
 from .permissions import (
-    ModelPermissionLevel,
     PermissionAccess,
     PermissionLevel,
     Permissions,
     PermissionsEvent,
 )
-from .runner import RunnerGroup, RunsOn
+from .runner import RunnerGroup
 from .triggers import On, OnConfiguration
-from .types import (
-    Configuration,
-    EnvMapping,
-    EnvVarValue,
-    ExpressionSyntax,
-    JobName,
-    JobNeeds,
-    MatrixIncludeExclude,
-    StringContainingExpression,
-)
+from .types import EnvMapping
 
 __all__ = [
-    "Architecture",
     "BranchProtectionRuleActivityType",
     "BranchProtectionRuleEvent",
     "CheckRunActivityType",
@@ -109,44 +93,30 @@ __all__ = [
     "CheckSuiteActivityType",
     "CheckSuiteEvent",
     "Concurrency",
-    "Configuration",
     "Container",
-    "ContainerCredentials",
     "Defaults",
     "DefaultsRun",
     "DiscussionActivityType",
     "DiscussionCommentActivityType",
     "DiscussionCommentEvent",
     "DiscussionEvent",
-    "EnvMapping",
-    "EnvVarValue",
     "Environment",
     "EventType",
-    "ExpressionSyntax",
-    "Globs",
     "IssueCommentActivityType",
     "IssueCommentEvent",
     "IssuesActivityType",
     "IssuesEvent",
-    "Job",
-    "JobName",
-    "JobNeeds",
     "LabelActivityType",
     "LabelEvent",
-    "Machine",
     "Matrix",
-    "MatrixIncludeExclude",
     "MergeGroupActivityType",
     "MergeGroupEvent",
     "MilestoneActivityType",
     "MilestoneEvent",
-    "ModelPermissionLevel",
     "NormalJob",
-    "On",
     "OnConfiguration",
     "PermissionAccess",
     "PermissionLevel",
-    "Permissions",
     "PermissionsEvent",
     "ProjectActivityType",
     "ProjectCardActivityType",
@@ -160,7 +130,6 @@ __all__ = [
     "PullRequestReviewCommentActivityType",
     "PullRequestReviewCommentEvent",
     "PullRequestReviewEvent",
-    "PullRequestTargetActivityType",
     "PullRequestTargetEvent",
     "PushEvent",
     "RegistryPackageActivityType",
@@ -169,29 +138,18 @@ __all__ = [
     "ReleaseEvent",
     "ReusableWorkflowCallJob",
     "RunnerGroup",
-    "RunsOn",
     "ScheduleItem",
-    "ShellType",
     "Step",
     "Strategy",
-    "StringContainingExpression",
     "Workflow",
     "WorkflowCallEvent",
-    "WorkflowCallInput",
     "WorkflowCallInputType",
-    "WorkflowCallOutput",
-    "WorkflowCallSecret",
     "WorkflowDispatchEvent",
     "WorkflowDispatchInput",
     "WorkflowDispatchInputType",
     "WorkflowRunActivityType",
     "WorkflowRunEvent",
 ]
-
-
-# =============================================================================
-# Workflow (Root Model)
-# =============================================================================
 
 
 class Workflow(StrictModel):
