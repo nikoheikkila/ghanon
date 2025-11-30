@@ -41,3 +41,6 @@ jobs:
 
       - name: Run unit tests
         run: task test:unit
+
+      - name: Run commandline test
+        run: task run -- .github/workflows/ci.yml
