@@ -14,35 +14,14 @@ from .environment import Environment
 from .matrix import Strategy
 from .runner import RunsOn
 from .step import Step
-from .types import EnvMapping, ExpressionSyntax, JobName
+from .types import EnvMapping, ExpressionSyntax, JobNeeds
 
 __all__ = [
     "Job",
-    "JobNeeds",
     "NormalJob",
     "ReusableWorkflowCallJob",
     "Step",
 ]
-
-
-# =============================================================================
-# Job Needs
-# =============================================================================
-
-JobNeeds = JobName | Annotated[list[JobName], Field(min_length=1)]
-"""
-Jobs that must complete successfully before this job will run.
-
-It can be a string or array of strings. If a job fails, all jobs that need it
-are skipped unless the jobs use a conditional statement that causes the job to continue.
-
-Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions#jobsjob_idneeds
-"""
-
-
-# =============================================================================
-# Jobs
-# =============================================================================
 
 
 class NormalJob(StrictModel):

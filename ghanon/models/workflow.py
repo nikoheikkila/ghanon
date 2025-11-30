@@ -72,16 +72,12 @@ from .events import (
 )
 from .jobs import (
     Job,
-    JobName,
-    JobNeeds,
     NormalJob,
     ReusableWorkflowCallJob,
     Step,
 )
 from .matrix import (
-    Configuration,
     Matrix,
-    MatrixIncludeExclude,
     Strategy,
 )
 from .permissions import (
@@ -92,6 +88,7 @@ from .permissions import (
     PermissionsEvent,
 )
 from .runner import RunnerGroup, RunsOn
+from .types import Configuration, JobName, JobNeeds, MatrixIncludeExclude
 
 __all__ = [
     "Architecture",

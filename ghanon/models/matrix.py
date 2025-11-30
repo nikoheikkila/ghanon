@@ -2,37 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any
-
 from pydantic import Field
 
 from .base import FlexibleModel, StrictModel
+from .types import ExpressionSyntax, MatrixIncludeExclude
 
 __all__ = [
-    "Configuration",
     "Matrix",
-    "MatrixIncludeExclude",
     "Strategy",
 ]
-
-
-# =============================================================================
-# Type Aliases
-# =============================================================================
-
-ExpressionSyntax = Annotated[str, Field(pattern=r"^\$\{\{(.|\r|\n)*\}\}$")]
-"""GitHub Actions expression syntax: ${{ ... }}"""
-
-Configuration = str | int | float | bool | dict[str, Any] | list[Any]
-"""Recursive configuration type for matrix values."""
-
-MatrixIncludeExclude = ExpressionSyntax | list[dict[str, Configuration]]
-"""Include/exclude entries in a matrix."""
-
-
-# =============================================================================
-# Matrix Strategy
-# =============================================================================
 
 
 class Matrix(FlexibleModel):
