@@ -5,14 +5,17 @@ from __future__ import annotations
 from enum import Enum, StrEnum
 
 __all__ = [
+    "Architecture",
     "BranchProtectionRuleActivityType",
     "CheckRunActivityType",
     "CheckSuiteActivityType",
     "DiscussionActivityType",
     "DiscussionCommentActivityType",
+    "EventType",
     "IssueCommentActivityType",
     "IssuesActivityType",
     "LabelActivityType",
+    "Machine",
     "MergeGroupActivityType",
     "MilestoneActivityType",
     "ModelPermissionLevel",
@@ -47,6 +50,64 @@ class PermissionAccess(str, Enum):
 
     READ_ALL = "read-all"
     WRITE_ALL = "write-all"
+
+
+class Architecture(str, Enum):
+    """Supported architectures for runners."""
+
+    ARM32 = "ARM32"
+    X64 = "x64"
+    X86 = "x86"
+
+
+class Machine(str, Enum):
+    """Supported machine types."""
+
+    LINUX = "linux"
+    MACOS = "macos"
+    WINDOWS = "windows"
+
+
+class EventType(str, Enum):
+    """GitHub events that can trigger workflows.
+
+    Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/events-that-trigger-workflows
+    """
+
+    BRANCH_PROTECTION_RULE = "branch_protection_rule"
+    CHECK_RUN = "check_run"
+    CHECK_SUITE = "check_suite"
+    CREATE = "create"
+    DELETE = "delete"
+    DEPLOYMENT = "deployment"
+    DEPLOYMENT_STATUS = "deployment_status"
+    DISCUSSION = "discussion"
+    DISCUSSION_COMMENT = "discussion_comment"
+    FORK = "fork"
+    GOLLUM = "gollum"
+    ISSUE_COMMENT = "issue_comment"
+    ISSUES = "issues"
+    LABEL = "label"
+    MERGE_GROUP = "merge_group"
+    MILESTONE = "milestone"
+    PAGE_BUILD = "page_build"
+    PROJECT = "project"
+    PROJECT_CARD = "project_card"
+    PROJECT_COLUMN = "project_column"
+    PUBLIC = "public"
+    PULL_REQUEST = "pull_request"
+    PULL_REQUEST_REVIEW = "pull_request_review"
+    PULL_REQUEST_REVIEW_COMMENT = "pull_request_review_comment"
+    PULL_REQUEST_TARGET = "pull_request_target"
+    PUSH = "push"
+    REGISTRY_PACKAGE = "registry_package"
+    RELEASE = "release"
+    STATUS = "status"
+    WATCH = "watch"
+    WORKFLOW_CALL = "workflow_call"
+    WORKFLOW_DISPATCH = "workflow_dispatch"
+    WORKFLOW_RUN = "workflow_run"
+    REPOSITORY_DISPATCH = "repository_dispatch"
 
 
 class ModelPermissionLevel(str, Enum):
