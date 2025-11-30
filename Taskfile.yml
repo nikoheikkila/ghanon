@@ -35,6 +35,12 @@ tasks:
       - clear
       - uv run pytest tests -q
 
+  test:update:
+    desc: Update test snapshots
+    cmds:
+      - rm -rf __snapshots__
+      - task: test:unit
+
   test:
     desc: Run all tests
     cmds:

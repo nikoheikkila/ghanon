@@ -222,7 +222,7 @@ class TestRoundTrip:
     def test_workflow_to_dict(self, minimal_workflow):
         workflow = parse_workflow(minimal_workflow)
         dump = workflow.model_dump_json()
-        assert_that(dump).snapshot()
+        assert_that(dump).snapshot("test_workflow_to_dict")
 
     def test_workflow_round_trip(self, minimal_workflow):
         first_workflow = parse_workflow(minimal_workflow)
