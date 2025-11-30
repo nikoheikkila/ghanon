@@ -1,33 +1,53 @@
-"""Tests for Permissions model."""
-
 from assertpy import assert_that
+from pydantic import ValidationError
 
 from ghanon.models.workflow import PermissionLevel, PermissionsEvent
 
 
 class TestPermissions:
-    """Tests for Permissions model."""
-
     def test_all_permissions(self):
-        p = PermissionsEvent.model_validate(
-            {
-                "actions": "read",
-                "attestations": "write",
-                "checks": "write",
-                "contents": "read",
-                "deployments": "write",
-                "discussions": "read",
-                "id-token": "write",
-                "issues": "write",
-                "models": "read",
-                "packages": "write",
-                "pages": "write",
-                "pull-requests": "write",
-                "repository-projects": "read",
-                "security-events": "write",
-                "statuses": "write",
-            },
-        )
-        assert_that(p.actions).is_equal_to(PermissionLevel.READ)
-        assert_that(p.id_token).is_equal_to(PermissionLevel.WRITE)
-        assert_that(p.models).is_equal_to("read")  # models has restricted enum
+        permissions = {
+            "actions": PermissionLevel.READ,
+            "attestations": PermissionLevel.WRITE,
+            "checks": PermissionLevel.WRITE,
+            "contents": PermissionLevel.READ,
+            "deployments": PermissionLevel.WRITE,
+            "discussions": PermissionLevel.READ,
+            "id-token": PermissionLevel.WRITE,
+            "issues": PermissionLevel.WRITE,
+            "models": PermissionLevel.READ,
+            "packages": PermissionLevel.WRITE,
+            "pages": PermissionLevel.WRITE,
+            "pull-requests": PermissionLevel.WRITE,
+            "repository-projects": PermissionLevel.READ,
+            "security-events": PermissionLevel.WRITE,
+            "statuses": PermissionLevel.WRITE,
+        }
+
+        result = PermissionsEvent.model_validate(permissions)
+
+        assert_that(result.actions).is_equal_to(PermissionLevel.READ)
+        assert_that(result.attestations).is_equal_to(PermissionLevel.WRITE)
+        assert_that(result.checks).is_equal_to(PermissionLevel.WRITE)
+        assert_that(result.contents).is_equal_to(PermissionLevel.READ)
+        assert_that(result.deployments).is_equal_to(PermissionLevel.WRITE)
+        assert_that(result.discussions).is_equal_to(PermissionLevel.READ)
+        assert_that(result.id_token).is_equal_to(PermissionLevel.WRITE)
+        assert_that(result.issues).is_equal_to(PermissionLevel.WRITE)
+        assert_that(result.models).is_equal_to(PermissionLevel.READ)
+        assert_that(result.packages).is_equal_to(PermissionLevel.WRITE)
+        assert_that(result.pages).is_equal_to(PermissionLevel.WRITE)
+        assert_that(result.pull_requests).is_equal_to(PermissionLevel.WRITE)
+        assert_that(result.repository_projects).is_equal_to(PermissionLevel.READ)
+        assert_that(result.security_events).is_equal_to(PermissionLevel.WRITE)
+        assert_that(result.statuses).is_equal_to(PermissionLevel.WRITE)
+
+    def test_requires_contents_read_when_customizing_permissions(self):
+        permissions_without_contents = {
+            "actions": PermissionLevel.READ,
+            "issues": PermissionLevel.WRITE,
+        }
+
+        assert_that(PermissionsEvent.model_validate).raises(ValidationError).when_called_with(
+            permissions_without_contents,
+        ).contains("must set 'contents: read' when customizing permissions")

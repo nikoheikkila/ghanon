@@ -83,6 +83,13 @@ from .jobs import (
     Step,
     Strategy,
 )
+from .permissions import (
+    ModelPermissionLevel,
+    PermissionAccess,
+    PermissionLevel,
+    Permissions,
+    PermissionsEvent,
+)
 
 __all__ = [
     "Architecture",
@@ -194,28 +201,6 @@ class Machine(str, Enum):
     WINDOWS = "windows"
 
 
-class PermissionLevel(str, Enum):
-    """Permission access levels for GITHUB_TOKEN."""
-
-    READ = "read"
-    WRITE = "write"
-    NONE = "none"
-
-
-class PermissionAccess(str, Enum):
-    """Global permission access shortcuts."""
-
-    READ_ALL = "read-all"
-    WRITE_ALL = "write-all"
-
-
-class ModelPermissionLevel(str, Enum):
-    """Permission levels for models (restricted to read/none)."""
-
-    READ = "read"
-    NONE = "none"
-
-
 class EventType(str, Enum):
     """GitHub events that can trigger workflows.
 
@@ -302,45 +287,6 @@ You can define environment variables for a step, job, or entire workflow using t
 jobs.<job_id>.steps[*].env, jobs.<job_id>.env, and env keywords.
 
 Reference: https://docs.github.com/en/actions/learn-github-actions/environment-variables
-"""
-
-
-# =============================================================================
-# Permissions
-# =============================================================================
-
-
-class PermissionsEvent(StrictModel):
-    """Fine-grained permissions for GITHUB_TOKEN.
-
-    You can modify the default permissions granted to the GITHUB_TOKEN,
-    adding or removing access as required, so that you only allow the
-    minimum required access.
-
-    Reference: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#permissions
-    """
-
-    actions: PermissionLevel | None = None
-    attestations: PermissionLevel | None = None
-    checks: PermissionLevel | None = None
-    contents: PermissionLevel | None = None
-    deployments: PermissionLevel | None = None
-    discussions: PermissionLevel | None = None
-    id_token: PermissionLevel | None = Field(default=None, alias="id-token")
-    issues: PermissionLevel | None = None
-    models: ModelPermissionLevel | None = None
-    packages: PermissionLevel | None = None
-    pages: PermissionLevel | None = None
-    pull_requests: PermissionLevel | None = Field(default=None, alias="pull-requests")
-    repository_projects: PermissionLevel | None = Field(default=None, alias="repository-projects")
-    security_events: PermissionLevel | None = Field(default=None, alias="security-events")
-    statuses: PermissionLevel | None = None
-
-
-Permissions = PermissionAccess | PermissionsEvent
-"""
-Permissions can be either a global access level ('read-all' or 'write-all')
-or fine-grained per-scope permissions.
 """
 
 
