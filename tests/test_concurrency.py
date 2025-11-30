@@ -1,5 +1,3 @@
-"""Tests for Concurrency model."""
-
 from assertpy import assert_that
 from pydantic import ValidationError
 
@@ -7,8 +5,6 @@ from ghanon.models.workflow import Concurrency
 
 
 class TestConcurrency:
-    """Tests for Concurrency model."""
-
     def test_group_only(self):
         concurrency = Concurrency.model_validate({"group": "ci-${{ github.ref }}"})
         assert_that(concurrency.group).is_equal_to("ci-${{ github.ref }}")

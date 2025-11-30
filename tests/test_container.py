@@ -1,13 +1,9 @@
-"""Tests for Container model."""
-
 from assertpy import assert_that
 
 from ghanon.models.workflow import Container
 
 
 class TestContainer:
-    """Tests for Container model."""
-
     def test_image_only(self):
         container = Container.model_validate({"image": "node:24"})
         assert_that(container.image).is_equal_to("node:24")
