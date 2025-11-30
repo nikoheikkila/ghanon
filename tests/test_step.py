@@ -81,6 +81,19 @@ class TestStep:
         step = Step.model_validate({"run": "long-task", "timeout-minutes": 60})
         assert_that(step.timeout_minutes).is_equal_to(60)
 
+    def test_multiline_run(self):
+        step = Step.model_validate(
+            {
+                "run": """|
+                    echo "Line 1"
+                    echo "Line 2"
+                    echo "Line 3"
+                """,
+            },
+        )
+
+        assert_that(step.run).contains("|", "Line 1", "Line 2", "Line 3")
+
     @pytest.mark.parametrize("shell", ["bash", "pwsh", "python", "sh", "cmd", "powershell"])
     def test_shell_types(self, shell):
         step = Step.model_validate({"run": "echo", "shell": shell})

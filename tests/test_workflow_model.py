@@ -116,6 +116,28 @@ class TestWorkflow:
     def test_empty_jobs_fails(self):
         assert_that(parse_workflow).raises(ValidationError).when_called_with({"on": "push", "jobs": {}})
 
+    def test_expression_in_env(self, minimal_job: dict):
+        env = "${{ fromJson(needs.setup.outputs.env) }}"
+
+        workflow = parse_workflow(
+            {
+                "on": "push",
+                "env": env,
+                "jobs": {"build": minimal_job},
+            },
+        )
+        assert_that(workflow.env).is_equal_to(env)
+
+    def test_special_characters_in_name(self, minimal_job: dict):
+        workflow = parse_workflow(
+            {
+                "name": "CI: Build & Test (v2.0)",
+                "on": "push",
+                "jobs": {"build": minimal_job},
+            },
+        )
+        assert_that(workflow.name).contains("&")
+
     @pytest.mark.parametrize("invalid_id", ["123start", "-invalid", "has space", "has.dot"])
     def test_invalid_job_id_fails(self, invalid_id, minimal_job):
         assert_that(parse_workflow).raises(ValidationError).when_called_with(

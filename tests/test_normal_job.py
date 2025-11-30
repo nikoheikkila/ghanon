@@ -135,3 +135,20 @@ class TestNormalJob:
     def test_runs_on_expression(self):
         job = NormalJob.model_validate({"runs-on": "${{ matrix.os }}"})
         assert_that(job.runs_on).is_equal_to("${{ matrix.os }}")
+
+    def test_expression_in_runs_on(self):
+        label = "${{ matrix.os }}"
+        job = NormalJob.model_validate({"runs-on": label})
+        assert_that(job.runs_on).is_equal_to(label)
+
+    def test_expression_in_timeout(self):
+        timeout = "${{ inputs.timeout }}"
+
+        job = NormalJob.model_validate(
+            {
+                "runs-on": "ubuntu-latest",
+                "timeout-minutes": timeout,
+            },
+        )
+
+        assert_that(job.timeout_minutes).is_equal_to(timeout)
