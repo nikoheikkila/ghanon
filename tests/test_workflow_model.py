@@ -6,6 +6,7 @@ import pytest
 from assertpy import assert_that
 from pydantic import ValidationError
 
+from ghanon.models.jobs import Strategy
 from ghanon.models.workflow import (
     Concurrency,
     EventType,
@@ -191,3 +192,46 @@ class TestOnConfiguration:
         assert_that(workflow.on.create).is_none()
         assert_that(workflow.on.delete).is_none()
         assert_that(workflow.on.fork).is_none()
+
+
+class TestRoundTrip:
+    def test_workflow_to_dict(self, minimal_workflow):
+        workflow = parse_workflow(minimal_workflow)
+        dump = workflow.model_dump_json()
+        assert_that(dump).snapshot()
+
+    def test_workflow_round_trip(self, minimal_workflow):
+        first_workflow = parse_workflow(minimal_workflow)
+        dump = first_workflow.model_dump(by_alias=True, exclude_none=True)
+        second_workflow = parse_workflow(dump)
+
+        assert_that(first_workflow.on).is_equal_to(second_workflow.on)
+        assert_that(list(first_workflow.jobs.keys())).is_equal_to(list(second_workflow.jobs.keys()))
+
+    def test_complex_round_trip(self):
+        data = {
+            "name": "Test",
+            "on": {"push": {"branches": ["main"]}, "pull_request": {}},
+            "concurrency": {"group": "ci", "cancel-in-progress": True},
+            "jobs": {
+                "build": {
+                    "runs-on": "ubuntu-latest",
+                    "strategy": {"matrix": {"node": ["18", "20"]}},
+                    "steps": [
+                        {"uses": "actions/checkout@v4"},
+                        {"run": "npm test", "shell": "bash"},
+                    ],
+                },
+            },
+        }
+
+        first_workflow = parse_workflow(data)
+        dump = first_workflow.model_dump(by_alias=True, exclude_none=True)
+        second_workflow = parse_workflow(dump)
+        first_build_job = first_workflow.jobs["build"]
+        second_build_job = second_workflow.jobs["build"]
+
+        assert isinstance(first_build_job.strategy, Strategy)
+        assert isinstance(second_build_job.strategy, Strategy)
+        assert_that(first_workflow.on).is_equal_to(second_workflow.on)
+        assert_that(first_build_job).is_equal_to(second_build_job)
