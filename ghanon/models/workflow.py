@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from .concurrency import Concurrency
 from .container import Container, ContainerCredentials
 from .defaults import Defaults, DefaultsRun, ShellType
+from .environment import Environment
 
 __all__ = [
     "Architecture",
@@ -528,27 +529,6 @@ Permissions = PermissionAccess | PermissionsEvent
 Permissions can be either a global access level ('read-all' or 'write-all')
 or fine-grained per-scope permissions.
 """
-
-
-# =============================================================================
-# Environment
-# =============================================================================
-
-
-class Environment(StrictModel):
-    """The environment that the job references.
-
-    Reference: https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idenvironment
-    """
-
-    name: str = Field(
-        ...,
-        description="The name of the environment configured in the repo.",
-    )
-    url: str | None = Field(
-        default=None,
-        description="A deployment URL",
-    )
 
 
 # =============================================================================
