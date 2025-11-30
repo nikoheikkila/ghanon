@@ -15,6 +15,9 @@ __all__ = [
     "LabelActivityType",
     "MergeGroupActivityType",
     "MilestoneActivityType",
+    "ModelPermissionLevel",
+    "PermissionAccess",
+    "PermissionLevel",
     "ProjectActivityType",
     "ProjectCardActivityType",
     "ProjectColumnActivityType",
@@ -29,6 +32,28 @@ __all__ = [
     "WorkflowDispatchInputType",
     "WorkflowRunActivityType",
 ]
+
+
+class PermissionLevel(str, Enum):
+    """Permission access levels for GITHUB_TOKEN."""
+
+    READ = "read"
+    WRITE = "write"
+    NONE = "none"
+
+
+class PermissionAccess(str, Enum):
+    """Global permission access shortcuts."""
+
+    READ_ALL = "read-all"
+    WRITE_ALL = "write-all"
+
+
+class ModelPermissionLevel(str, Enum):
+    """Permission levels for models (restricted to read/none)."""
+
+    READ = "read"
+    NONE = "none"
 
 
 class ShellType(StrEnum):

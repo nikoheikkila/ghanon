@@ -2,51 +2,15 @@
 
 from __future__ import annotations
 
-from enum import Enum
-
 from pydantic import Field, model_validator
 
 from .base import StrictModel
+from .enums import ModelPermissionLevel, PermissionAccess, PermissionLevel
 
 __all__ = [
-    "ModelPermissionLevel",
-    "PermissionAccess",
-    "PermissionLevel",
     "Permissions",
     "PermissionsEvent",
 ]
-
-
-# =============================================================================
-# Enums
-# =============================================================================
-
-
-class PermissionLevel(str, Enum):
-    """Permission access levels for GITHUB_TOKEN."""
-
-    READ = "read"
-    WRITE = "write"
-    NONE = "none"
-
-
-class PermissionAccess(str, Enum):
-    """Global permission access shortcuts."""
-
-    READ_ALL = "read-all"
-    WRITE_ALL = "write-all"
-
-
-class ModelPermissionLevel(str, Enum):
-    """Permission levels for models (restricted to read/none)."""
-
-    READ = "read"
-    NONE = "none"
-
-
-# =============================================================================
-# Permissions
-# =============================================================================
 
 
 class PermissionsEvent(StrictModel):
