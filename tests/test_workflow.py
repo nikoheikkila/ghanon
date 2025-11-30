@@ -60,10 +60,8 @@ from ghanon.models.workflow import (
     WorkflowDispatchInputType,
     WorkflowRunActivityType,
     WorkflowRunEvent,
-    # Functions
-    parse_workflow,
-    parse_workflow_yaml,
 )
+from ghanon.parser import parse_workflow, parse_workflow_yaml
 
 # =============================================================================
 # Fixtures
