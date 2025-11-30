@@ -14,7 +14,7 @@ def minimal_config():
     }
 
 
-class TestStrategy:
+class TestMatrix:
     def test_simple_matrix(self, minimal_config):
         strategy = Strategy.model_validate(minimal_config)
         assert_that(strategy.matrix).is_instance_of(Matrix)
