@@ -1,31 +1,48 @@
-"""Tests for GitHub Actions event configurations."""
+from typing import Any
 
 import pytest
 from assertpy import assert_that
 from pydantic import ValidationError
 
 from ghanon.models.workflow import (
+    BranchProtectionRuleActivityType,
     BranchProtectionRuleEvent,
+    CheckRunActivityType,
     CheckRunEvent,
+    CheckSuiteActivityType,
     CheckSuiteEvent,
+    DiscussionActivityType,
+    DiscussionCommentActivityType,
     DiscussionCommentEvent,
     DiscussionEvent,
+    IssueCommentActivityType,
     IssueCommentEvent,
+    IssuesActivityType,
     IssuesEvent,
+    LabelActivityType,
     LabelEvent,
+    MergeGroupActivityType,
     MergeGroupEvent,
+    MilestoneActivityType,
     MilestoneEvent,
     OnConfiguration,
+    ProjectActivityType,
+    ProjectCardActivityType,
     ProjectCardEvent,
+    ProjectColumnActivityType,
     ProjectColumnEvent,
     ProjectEvent,
     PullRequestActivityType,
     PullRequestEvent,
+    PullRequestReviewActivityType,
+    PullRequestReviewCommentActivityType,
     PullRequestReviewCommentEvent,
     PullRequestReviewEvent,
     PullRequestTargetEvent,
     PushEvent,
+    RegistryPackageActivityType,
     RegistryPackageEvent,
+    ReleaseActivityType,
     ReleaseEvent,
     ScheduleItem,
     WorkflowCallEvent,
@@ -40,19 +57,19 @@ from ghanon.parser import parse_workflow
 
 
 class TestPushEvent:
-    """Tests for push event configuration."""
-
     def test_empty(self):
-        e = PushEvent.model_validate({})
-        assert_that(e.branches).is_none()
+        event = PushEvent.model_validate({})
+        assert_that(event.branches).is_none()
 
     def test_branches(self):
-        e = PushEvent.model_validate({"branches": ["main", "develop"]})
-        assert_that(e.branches).is_equal_to(["main", "develop"])
+        branches = ["main", "develop"]
+        event = PushEvent.model_validate({"branches": branches})
+        assert_that(event.branches).is_equal_to(branches)
 
     def test_branches_ignore(self):
-        e = PushEvent.model_validate({"branches-ignore": ["feature/*"]})
-        assert_that(e.branches_ignore).is_equal_to(["feature/*"])
+        ignored_branches = ["feature/*"]
+        event = PushEvent.model_validate({"branches-ignore": ignored_branches})
+        assert_that(event.branches_ignore).is_equal_to(ignored_branches)
 
     def test_branches_exclusive(self):
         assert_that(PushEvent.model_validate).raises(ValidationError).when_called_with(
@@ -60,12 +77,14 @@ class TestPushEvent:
         )
 
     def test_tags(self):
-        e = PushEvent.model_validate({"tags": ["v*"]})
-        assert_that(e.tags).is_equal_to(["v*"])
+        tags = ["v*"]
+        event = PushEvent.model_validate({"tags": tags})
+        assert_that(event.tags).is_equal_to(tags)
 
     def test_tags_ignore(self):
-        e = PushEvent.model_validate({"tags-ignore": ["v0.*"]})
-        assert_that(e.tags_ignore).is_equal_to(["v0.*"])
+        tags = ["v0.*"]
+        event = PushEvent.model_validate({"tags-ignore": tags})
+        assert_that(event.tags_ignore).is_equal_to(tags)
 
     def test_tags_exclusive(self):
         assert_that(PushEvent.model_validate).raises(ValidationError).when_called_with(
@@ -73,12 +92,14 @@ class TestPushEvent:
         )
 
     def test_paths(self):
-        e = PushEvent.model_validate({"paths": ["src/**", "*.py"]})
-        assert_that(e.paths).is_equal_to(["src/**", "*.py"])
+        paths = ["src/**", "*.py"]
+        event = PushEvent.model_validate({"paths": paths})
+        assert_that(event.paths).is_equal_to(paths)
 
     def test_paths_ignore(self):
-        e = PushEvent.model_validate({"paths-ignore": ["docs/**", "*.md"]})
-        assert_that(e.paths_ignore).is_equal_to(["docs/**", "*.md"])
+        paths_ignore = ["docs/**", "*.md"]
+        event = PushEvent.model_validate({"paths-ignore": paths_ignore})
+        assert_that(event.paths_ignore).is_equal_to(paths_ignore)
 
     def test_paths_exclusive(self):
         assert_that(PushEvent.model_validate).raises(ValidationError).when_called_with(
@@ -90,29 +111,32 @@ class TestPullRequestEvent:
     """Tests for pull_request event configuration."""
 
     def test_types(self):
-        e = PullRequestEvent.model_validate({"types": ["opened", "synchronize", "reopened"]})
-        assert_that(e.types).is_length(3)
-        assert_that(e.types).contains(PullRequestActivityType.OPENED)
+        types = [
+            PullRequestActivityType.OPENED,
+            PullRequestActivityType.SYNCHRONIZE,
+            PullRequestActivityType.REOPENED,
+        ]
+        event = PullRequestEvent.model_validate({"types": types})
+        assert_that(event.types).contains(*types)
 
     def test_all_filters(self):
-        e = PullRequestEvent.model_validate(
+        event = PullRequestEvent.model_validate(
             {
-                "types": ["opened"],
+                "types": [PullRequestActivityType.OPENED],
                 "branches": ["main"],
                 "paths": ["src/**"],
             },
         )
-        assert_that(e.types).is_equal_to([PullRequestActivityType.OPENED])
-        assert_that(e.branches).is_equal_to(["main"])
-        assert_that(e.paths).is_equal_to(["src/**"])
+        assert_that(event.types).is_equal_to([PullRequestActivityType.OPENED])
+        assert_that(event.branches).is_equal_to(["main"])
+        assert_that(event.paths).is_equal_to(["src/**"])
 
 
 class TestPullRequestTargetEvent:
-    """Tests for pull_request_target event configuration."""
-
     def test_types(self):
-        e = PullRequestTargetEvent.model_validate({"types": ["opened", "labeled"]})
-        assert_that(e.types).is_length(2)
+        types = [PullRequestActivityType.LABELED, PullRequestActivityType.OPENED]
+        event = PullRequestTargetEvent.model_validate({"types": types})
+        assert_that(event.types).contains(*types)
 
     def test_filter_exclusivity(self):
         assert_that(PullRequestTargetEvent.model_validate).raises(ValidationError).when_called_with(
@@ -127,28 +151,32 @@ class TestScheduleEvent:
     """Tests for schedule event configuration."""
 
     def test_single_cron(self):
-        item = ScheduleItem.model_validate({"cron": "0 0 * * *"})
-        assert_that(item.cron).is_equal_to("0 0 * * *")
+        pattern = "0 0 * * *"
+        item = ScheduleItem.model_validate({"cron": pattern})
+        assert_that(item.cron).is_equal_to(pattern)
 
-    def test_in_workflow(self, minimal_job):
-        w = parse_workflow(
+    def test_in_workflow(self, minimal_job: dict[str, Any]):
+        patterns = [{"cron": "0 0 * * *"}, {"cron": "0 12 * * 1-5"}]
+        workflow = parse_workflow(
             {
-                "on": {"schedule": [{"cron": "0 0 * * *"}, {"cron": "0 12 * * 1-5"}]},
+                "on": {"schedule": patterns},
                 "jobs": {"build": minimal_job},
             },
         )
-        assert_that(w.on.schedule).is_length(2)
+
+        assert isinstance(workflow.on, OnConfiguration)
+        assert isinstance(workflow.on.schedule, list)
+        assert_that(workflow.on.schedule[0].cron).is_equal_to("0 0 * * *")
+        assert_that(workflow.on.schedule[1].cron).is_equal_to("0 12 * * 1-5")
 
 
 class TestWorkflowDispatchEvent:
-    """Tests for workflow_dispatch event configuration."""
-
     def test_empty(self):
-        e = WorkflowDispatchEvent.model_validate({})
-        assert_that(e.inputs).is_none()
+        event = WorkflowDispatchEvent.model_validate({})
+        assert_that(event.inputs).is_none()
 
     def test_string_input(self):
-        e = WorkflowDispatchEvent.model_validate(
+        event = WorkflowDispatchEvent.model_validate(
             {
                 "inputs": {
                     "name": {
@@ -159,10 +187,12 @@ class TestWorkflowDispatchEvent:
                 },
             },
         )
-        assert_that(e.inputs["name"].type).is_equal_to(WorkflowDispatchInputType.STRING)
+
+        assert event.inputs is not None
+        assert_that(event.inputs["name"].type).is_equal_to(WorkflowDispatchInputType.STRING)
 
     def test_boolean_input(self):
-        e = WorkflowDispatchEvent.model_validate(
+        event = WorkflowDispatchEvent.model_validate(
             {
                 "inputs": {
                     "debug": {
@@ -173,10 +203,12 @@ class TestWorkflowDispatchEvent:
                 },
             },
         )
-        assert_that(e.inputs["debug"].type).is_equal_to(WorkflowDispatchInputType.BOOLEAN)
+
+        assert event.inputs is not None
+        assert_that(event.inputs["debug"].type).is_equal_to(WorkflowDispatchInputType.BOOLEAN)
 
     def test_choice_input(self):
-        e = WorkflowDispatchEvent.model_validate(
+        event = WorkflowDispatchEvent.model_validate(
             {
                 "inputs": {
                     "env": {
@@ -187,7 +219,9 @@ class TestWorkflowDispatchEvent:
                 },
             },
         )
-        assert_that(e.inputs["env"].options).is_equal_to(["dev", "staging", "prod"])
+
+        assert event.inputs is not None
+        assert_that(event.inputs["env"].options).is_equal_to(["dev", "staging", "prod"])
 
     def test_choice_requires_options(self):
         assert_that(WorkflowDispatchInput.model_validate).raises(ValidationError).when_called_with(
@@ -198,19 +232,19 @@ class TestWorkflowDispatchEvent:
         )
 
     def test_required_input(self):
-        e = WorkflowDispatchEvent.model_validate(
+        event = WorkflowDispatchEvent.model_validate(
             {
                 "inputs": {"token": {"description": "API Token", "required": True}},
             },
         )
-        assert_that(e.inputs["token"].required).is_true()
+
+        assert event.inputs is not None
+        assert_that(event.inputs["token"].required).is_true()
 
 
 class TestWorkflowCallEvent:
-    """Tests for workflow_call event configuration."""
-
     def test_inputs(self):
-        e = WorkflowCallEvent.model_validate(
+        event = WorkflowCallEvent.model_validate(
             {
                 "inputs": {
                     "environment": {"type": "string", "required": True},
@@ -218,110 +252,144 @@ class TestWorkflowCallEvent:
                 },
             },
         )
-        assert_that(e.inputs["environment"].type).is_equal_to(WorkflowCallInputType.STRING)
-        assert_that(e.inputs["debug"].default).is_false()
+
+        assert event.inputs is not None
+        assert_that(event.inputs["environment"].type).is_equal_to(WorkflowCallInputType.STRING)
+        assert_that(event.inputs["debug"].default).is_false()
 
     def test_outputs(self):
-        e = WorkflowCallEvent.model_validate(
+        event = WorkflowCallEvent.model_validate(
             {
                 "outputs": {
                     "version": {
-                        "description": "The version",
+                        "description": "v1.2.3",
                         "value": "${{ jobs.build.outputs.version }}",
                     },
                 },
             },
         )
-        assert_that(e.outputs).contains_key("version")
+
+        assert event.outputs is not None
+        assert_that(event.outputs["version"].description).is_equal_to("v1.2.3")
+        assert_that(event.outputs["version"].value).is_equal_to("${{ jobs.build.outputs.version }}")
 
     def test_secrets(self):
-        e = WorkflowCallEvent.model_validate(
+        event = WorkflowCallEvent.model_validate(
             {
                 "secrets": {
                     "API_KEY": {"description": "API key", "required": True},
                 },
             },
         )
-        assert_that(e.secrets["API_KEY"].required).is_true()
+
+        assert event.secrets is not None
+        assert_that(event.secrets["API_KEY"].required).is_true()
+        assert_that(event.secrets["API_KEY"].description).is_equal_to("API key")
 
 
 class TestWorkflowRunEvent:
-    """Tests for workflow_run event configuration."""
-
     def test_types(self):
-        e = WorkflowRunEvent.model_validate(
+        event = WorkflowRunEvent.model_validate(
             {
-                "types": ["completed"],
+                "types": [WorkflowRunActivityType.COMPLETED],
                 "workflows": ["CI"],
             },
         )
-        assert_that(e.types).contains(WorkflowRunActivityType.COMPLETED)
+
+        assert_that(event.types).contains(WorkflowRunActivityType.COMPLETED)
+        assert_that(event.workflows).contains("CI")
 
     def test_branches(self):
-        e = WorkflowRunEvent.model_validate(
+        event = WorkflowRunEvent.model_validate(
             {
                 "workflows": ["Build"],
                 "branches": ["main"],
             },
         )
-        assert_that(e.branches).is_equal_to(["main"])
+
+        assert_that(event.branches).is_equal_to(["main"])
+        assert_that(event.workflows).contains("Build")
 
 
 class TestActivityTypeEvents:
-    """Tests for events with activity types."""
-
     @pytest.mark.parametrize(
         ("event_class", "types"),
         [
-            (BranchProtectionRuleEvent, ["created", "edited", "deleted"]),
-            (CheckRunEvent, ["created", "rerequested", "completed"]),
-            (CheckSuiteEvent, ["completed", "requested"]),
-            (DiscussionEvent, ["created", "answered"]),
-            (DiscussionCommentEvent, ["created", "edited"]),
-            (IssueCommentEvent, ["created", "deleted"]),
-            (IssuesEvent, ["opened", "closed", "labeled"]),
-            (LabelEvent, ["created", "deleted"]),
-            (MergeGroupEvent, ["checks_requested"]),
-            (MilestoneEvent, ["created", "closed"]),
-            (ProjectEvent, ["created", "closed"]),
-            (ProjectCardEvent, ["created", "moved"]),
-            (ProjectColumnEvent, ["created", "moved"]),
-            (PullRequestReviewEvent, ["submitted", "dismissed"]),
-            (PullRequestReviewCommentEvent, ["created", "edited"]),
-            (RegistryPackageEvent, ["published", "updated"]),
-            (ReleaseEvent, ["published", "released"]),
+            (
+                BranchProtectionRuleEvent,
+                [
+                    BranchProtectionRuleActivityType.CREATED,
+                    BranchProtectionRuleActivityType.EDITED,
+                    BranchProtectionRuleActivityType.DELETED,
+                ],
+            ),
+            (
+                CheckRunEvent,
+                [
+                    CheckRunActivityType.CREATED,
+                    CheckRunActivityType.REREQUESTED,
+                    CheckRunActivityType.COMPLETED,
+                ],
+            ),
+            (
+                CheckSuiteEvent,
+                [CheckSuiteActivityType.COMPLETED, CheckSuiteActivityType.REQUESTED],
+            ),
+            (
+                DiscussionEvent,
+                [DiscussionActivityType.CREATED, DiscussionActivityType.ANSWERED],
+            ),
+            (
+                DiscussionCommentEvent,
+                [DiscussionCommentActivityType.CREATED, DiscussionCommentActivityType.EDITED],
+            ),
+            (
+                IssueCommentEvent,
+                [IssueCommentActivityType.CREATED, IssueCommentActivityType.DELETED],
+            ),
+            (
+                IssuesEvent,
+                [IssuesActivityType.OPENED, IssuesActivityType.CLOSED, IssuesActivityType.LABELED],
+            ),
+            (LabelEvent, [LabelActivityType.CREATED, LabelActivityType.DELETED]),
+            (MergeGroupEvent, [MergeGroupActivityType.CHECKS_REQUESTED]),
+            (
+                MilestoneEvent,
+                [MilestoneActivityType.CREATED, MilestoneActivityType.CLOSED],
+            ),
+            (ProjectEvent, [ProjectActivityType.CREATED, ProjectActivityType.CLOSED]),
+            (
+                ProjectCardEvent,
+                [ProjectCardActivityType.CREATED, ProjectCardActivityType.MOVED],
+            ),
+            (
+                ProjectColumnEvent,
+                [ProjectColumnActivityType.CREATED, ProjectColumnActivityType.MOVED],
+            ),
+            (
+                PullRequestReviewEvent,
+                [
+                    PullRequestReviewActivityType.SUBMITTED,
+                    PullRequestReviewActivityType.DISMISSED,
+                ],
+            ),
+            (
+                PullRequestReviewCommentEvent,
+                [
+                    PullRequestReviewCommentActivityType.CREATED,
+                    PullRequestReviewCommentActivityType.EDITED,
+                ],
+            ),
+            (
+                RegistryPackageEvent,
+                [RegistryPackageActivityType.PUBLISHED, RegistryPackageActivityType.UPDATED],
+            ),
+            (
+                ReleaseEvent,
+                [ReleaseActivityType.PUBLISHED, ReleaseActivityType.RELEASED],
+            ),
         ],
     )
     def test_activity_types(self, event_class, types):
-        e = event_class.model_validate({"types": types})
-        assert_that(e.types).is_not_none()
-        assert_that(e.types).is_length(len(types))
-
-
-class TestOnConfiguration:
-    """Tests for complete on configuration."""
-
-    def test_multiple_events(self, minimal_job):
-        w = parse_workflow(
-            {
-                "on": {
-                    "push": {"branches": ["main"]},
-                    "pull_request": {"branches": ["main"]},
-                    "workflow_dispatch": {},
-                },
-                "jobs": {"build": minimal_job},
-            },
-        )
-        assert_that(w.on).is_instance_of(OnConfiguration)
-        assert_that(w.on.push).is_not_none()
-        assert_that(w.on.pull_request).is_not_none()
-        assert_that(w.on.workflow_dispatch).is_not_none()
-
-    def test_simple_events(self, minimal_job):
-        w = parse_workflow(
-            {
-                "on": {"create": None, "delete": None, "fork": None},
-                "jobs": {"build": minimal_job},
-            },
-        )
-        assert_that(w.on).is_instance_of(OnConfiguration)
+        event = event_class.model_validate({"types": types})
+        assert_that(event.types).contains(*types)

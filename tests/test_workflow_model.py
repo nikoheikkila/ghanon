@@ -1,5 +1,7 @@
 """Tests for root Workflow model."""
 
+from typing import Any
+
 import pytest
 from assertpy import assert_that
 from pydantic import ValidationError
@@ -7,9 +9,13 @@ from pydantic import ValidationError
 from ghanon.models.workflow import (
     Concurrency,
     EventType,
+    OnConfiguration,
     PermissionAccess,
     PermissionLevel,
     PermissionsEvent,
+    PullRequestEvent,
+    PushEvent,
+    WorkflowDispatchEvent,
 )
 from ghanon.parser import parse_workflow
 
@@ -148,3 +154,40 @@ class TestWorkflow:
     def test_valid_job_ids(self, valid_id, minimal_job):
         w = parse_workflow({"on": "push", "jobs": {valid_id: minimal_job}})
         assert_that(w.jobs).contains_key(valid_id)
+
+
+class TestOnConfiguration:
+    def test_multiple_events(self, minimal_job: dict[str, Any]):
+        branches = ["main"]
+        triggers = {"branches": branches}
+
+        workflow = parse_workflow(
+            {
+                "on": {
+                    "push": triggers,
+                    "pull_request": triggers,
+                    "workflow_dispatch": {},
+                },
+                "jobs": {"build": minimal_job},
+            },
+        )
+
+        assert isinstance(workflow.on, OnConfiguration)
+        assert isinstance(workflow.on.push, PushEvent)
+        assert isinstance(workflow.on.pull_request, PullRequestEvent)
+        assert isinstance(workflow.on.workflow_dispatch, WorkflowDispatchEvent)
+        assert_that(workflow.on.push.branches).is_equal_to(branches)
+        assert_that(workflow.on.pull_request.branches).is_equal_to(branches)
+
+    def test_simple_events(self, minimal_job: dict[str, Any]):
+        workflow = parse_workflow(
+            {
+                "on": {"create": None, "delete": None, "fork": None},
+                "jobs": {"build": minimal_job},
+            },
+        )
+
+        assert isinstance(workflow.on, OnConfiguration)
+        assert_that(workflow.on.create).is_none()
+        assert_that(workflow.on.delete).is_none()
+        assert_that(workflow.on.fork).is_none()
