@@ -24,6 +24,16 @@ tasks:
     cmds:
       - uv run pytest tests -v
 
+  test:watch:
+    desc: Run tests in watch mode
+    watch: true
+    sources:
+      - tests/**/*.py
+      - ghanon/**/*.py
+    cmds:
+      - clear
+      - uv run pytest tests -q
+
   test:
     desc: Run all tests
     cmds:
