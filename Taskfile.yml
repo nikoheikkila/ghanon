@@ -7,8 +7,7 @@ tasks:
   install:
     desc: Install dependencies
     cmds:
-      - uv sync --locked --all-extras --dev
-      - uv pip install -e .
+      - uv sync --locked --all-extras --all-packages --dev
 
   lint:
     desc: Lint the codebase
