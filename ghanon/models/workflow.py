@@ -12,6 +12,8 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from .concurrency import Concurrency
+
 __all__ = [
     "Architecture",
     "BranchProtectionRuleActivityType",
@@ -496,39 +498,6 @@ jobs.<job_id>.steps[*].env, jobs.<job_id>.env, and env keywords.
 
 Reference: https://docs.github.com/en/actions/learn-github-actions/environment-variables
 """
-
-
-# =============================================================================
-# Concurrency
-# =============================================================================
-
-
-class Concurrency(StrictModel):
-    """Concurrency configuration.
-
-    Concurrency ensures that only a single job or workflow using the same
-    concurrency group will run at a time.
-
-    Reference: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#example-using-concurrency-to-cancel-any-in-progress-job-or-run-1
-    """
-
-    group: str = Field(
-        ...,
-        description=(
-            "When a concurrent job or workflow is queued, if another job or workflow "
-            "using the same concurrency group in the repository is in progress, the "
-            "queued job or workflow will be pending. Any previously pending job or "
-            "workflow in the concurrency group will be canceled."
-        ),
-    )
-    cancel_in_progress: bool | ExpressionSyntax | None = Field(
-        default=None,
-        alias="cancel-in-progress",
-        description=(
-            "To cancel any currently running job or workflow in the same concurrency group, "
-            "specify cancel-in-progress: true."
-        ),
-    )
 
 
 # =============================================================================
