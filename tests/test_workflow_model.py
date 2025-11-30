@@ -1,11 +1,10 @@
-"""Tests for root Workflow model."""
-
 from typing import Any
 
 import pytest
 from assertpy import assert_that
 from pydantic import ValidationError
 
+from ghanon.models.defaults import Defaults, DefaultsRun
 from ghanon.models.matrix import Strategy
 from ghanon.models.workflow import (
     Concurrency,
@@ -22,65 +21,79 @@ from ghanon.parser import parse_workflow
 
 
 class TestWorkflow:
-    """Tests for the root Workflow model."""
-
     def test_minimal(self, minimal_workflow):
-        w = parse_workflow(minimal_workflow)
-        assert_that(w.on).is_equal_to(EventType.PUSH)
-        assert_that(w.jobs).contains_key("build")
+        workflow = parse_workflow(minimal_workflow)
+        assert_that(workflow.on).is_equal_to(EventType.PUSH)
+        assert_that(workflow.jobs).contains_key("build")
 
     def test_with_name(self, minimal_job):
-        w = parse_workflow({"name": "CI", "on": "push", "jobs": {"build": minimal_job}})
-        assert_that(w.name).is_equal_to("CI")
+        workflow = parse_workflow({"name": "CI", "on": "push", "jobs": {"build": minimal_job}})
+        assert_that(workflow.name).is_equal_to("CI")
 
     def test_with_run_name(self, minimal_job):
-        w = parse_workflow(
+        run_name = "Deploy by @${{ github.actor }}"
+
+        workflow = parse_workflow(
             {
                 "name": "Deploy",
-                "run-name": "Deploy by @${{ github.actor }}",
+                "run-name": run_name,
                 "on": "push",
                 "jobs": {"build": minimal_job},
             },
         )
-        assert_that(w.run_name).is_equal_to("Deploy by @${{ github.actor }}")
+
+        assert_that(workflow.run_name).is_equal_to(run_name)
 
     def test_event_list(self, minimal_job):
-        w = parse_workflow({"on": ["push", "pull_request"], "jobs": {"build": minimal_job}})
-        assert_that(w.on).is_equal_to([EventType.PUSH, EventType.PULL_REQUEST])
+        events = [EventType.PUSH, EventType.PULL_REQUEST]
+        workflow = parse_workflow({"on": events, "jobs": {"build": minimal_job}})
+        assert_that(workflow.on).is_equal_to(events)
 
     def test_env(self, minimal_job):
-        w = parse_workflow(
+        env = {"CI": "true", "NODE_VERSION": 18}
+
+        workflow = parse_workflow(
             {
                 "on": "push",
-                "env": {"CI": "true", "NODE_VERSION": 18},
+                "env": env,
                 "jobs": {"build": minimal_job},
             },
         )
-        assert_that(w.env).is_equal_to({"CI": "true", "NODE_VERSION": 18})
+
+        assert_that(workflow.env).is_equal_to(env)
 
     def test_defaults(self, minimal_job):
-        w = parse_workflow(
+        shell = "bash"
+        working_directory = "./src"
+
+        workflow = parse_workflow(
             {
                 "on": "push",
-                "defaults": {"run": {"shell": "bash", "working-directory": "./src"}},
+                "defaults": {"run": {"shell": shell, "working-directory": working_directory}},
                 "jobs": {"build": minimal_job},
             },
         )
-        assert_that(w.defaults.run.shell).is_equal_to("bash")
-        assert_that(w.defaults.run.working_directory).is_equal_to("./src")
+
+        assert isinstance(workflow.defaults, Defaults)
+        assert isinstance(workflow.defaults.run, DefaultsRun)
+        assert_that(workflow.defaults.run.shell).is_equal_to(shell)
+        assert_that(workflow.defaults.run.working_directory).is_equal_to(working_directory)
 
     def test_concurrency_string(self, minimal_job):
-        w = parse_workflow(
+        group = "ci-${{ github.ref }}"
+
+        workflow = parse_workflow(
             {
                 "on": "push",
-                "concurrency": "ci-${{ github.ref }}",
+                "concurrency": group,
                 "jobs": {"build": minimal_job},
             },
         )
-        assert_that(w.concurrency).is_equal_to("ci-${{ github.ref }}")
+
+        assert_that(workflow.concurrency).is_equal_to(group)
 
     def test_concurrency_object(self, minimal_job):
-        w = parse_workflow(
+        workflow = parse_workflow(
             {
                 "on": "push",
                 "concurrency": {
@@ -90,29 +103,40 @@ class TestWorkflow:
                 "jobs": {"build": minimal_job},
             },
         )
-        assert_that(w.concurrency).is_instance_of(Concurrency)
-        assert_that(w.concurrency.cancel_in_progress).is_true()
+
+        assert isinstance(workflow.concurrency, Concurrency)
+        assert_that(workflow.concurrency.cancel_in_progress).is_true()
 
     def test_permissions_global(self, minimal_job):
-        w = parse_workflow({"on": "push", "permissions": "read-all", "jobs": {"build": minimal_job}})
-        assert_that(w.permissions).is_equal_to(PermissionAccess.READ_ALL)
+        workflow = parse_workflow(
+            {
+                "on": "push",
+                "permissions": PermissionAccess.READ_ALL,
+                "jobs": {
+                    "build": minimal_job,
+                },
+            },
+        )
+
+        assert_that(workflow.permissions).is_equal_to(PermissionAccess.READ_ALL)
 
     def test_permissions_granular(self, minimal_job):
-        w = parse_workflow(
+        workflow = parse_workflow(
             {
                 "on": "push",
                 "permissions": {
-                    "contents": "read",
-                    "pull-requests": "write",
-                    "issues": "none",
+                    "contents": PermissionLevel.READ,
+                    "pull-requests": PermissionLevel.WRITE,
+                    "issues": PermissionLevel.NONE,
                 },
                 "jobs": {"build": minimal_job},
             },
         )
-        assert_that(w.permissions).is_instance_of(PermissionsEvent)
-        assert_that(w.permissions.contents).is_equal_to(PermissionLevel.READ)
-        assert_that(w.permissions.pull_requests).is_equal_to(PermissionLevel.WRITE)
-        assert_that(w.permissions.issues).is_equal_to(PermissionLevel.NONE)
+
+        assert isinstance(workflow.permissions, PermissionsEvent)
+        assert_that(workflow.permissions.contents).is_equal_to(PermissionLevel.READ)
+        assert_that(workflow.permissions.pull_requests).is_equal_to(PermissionLevel.WRITE)
+        assert_that(workflow.permissions.issues).is_equal_to(PermissionLevel.NONE)
 
     def test_missing_on_fails(self, minimal_job):
         assert_that(parse_workflow).raises(ValidationError).when_called_with({"jobs": {"build": minimal_job}})
