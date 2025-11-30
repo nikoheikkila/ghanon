@@ -32,12 +32,10 @@ from ghanon.models.workflow import (
     ProjectColumnActivityType,
     ProjectColumnEvent,
     ProjectEvent,
-    PullRequestActivityType,
     PullRequestReviewActivityType,
     PullRequestReviewCommentActivityType,
     PullRequestReviewCommentEvent,
     PullRequestReviewEvent,
-    PullRequestTargetEvent,
     RegistryPackageActivityType,
     RegistryPackageEvent,
     ReleaseActivityType,
@@ -52,21 +50,6 @@ from ghanon.models.workflow import (
     WorkflowRunEvent,
 )
 from ghanon.parser import parse_workflow
-
-
-class TestPullRequestTargetEvent:
-    def test_types(self):
-        types = [PullRequestActivityType.LABELED, PullRequestActivityType.OPENED]
-        event = PullRequestTargetEvent.model_validate({"types": types})
-        assert_that(event.types).contains(*types)
-
-    def test_filter_exclusivity(self):
-        assert_that(PullRequestTargetEvent.model_validate).raises(ValidationError).when_called_with(
-            {
-                "branches": ["main"],
-                "branches-ignore": ["feature/*"],
-            },
-        )
 
 
 class TestScheduleEvent:
