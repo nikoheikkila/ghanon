@@ -2,46 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Annotated
-
 from pydantic import Field, model_validator
 
 from .base import StrictModel
 from .defaults import ShellType
+from .types import EnvMapping, ExpressionSyntax
 
 __all__ = [
     "Step",
 ]
-
-
-# =============================================================================
-# Type Aliases
-# =============================================================================
-
-ExpressionSyntax = Annotated[str, Field(pattern=r"^\$\{\{(.|\r|\n)*\}\}$")]
-"""GitHub Actions expression syntax: ${{ ... }}"""
-
-StringContainingExpression = Annotated[str, Field(pattern=r"^.*\$\{\{(.|\r|\n)*\}\}.*$")]
-"""String containing GitHub Actions expression syntax."""
-
-EnvVarValue = str | int | float | bool
-"""Valid types for environment variable values."""
-
-EnvMapping = dict[str, EnvVarValue] | StringContainingExpression
-"""
-Environment variables mapping.
-
-To set custom environment variables, you need to specify the variables in the workflow file.
-You can define environment variables for a step, job, or entire workflow using the
-jobs.<job_id>.steps[*].env, jobs.<job_id>.env, and env keywords.
-
-Reference: https://docs.github.com/en/actions/learn-github-actions/environment-variables
-"""
-
-
-# =============================================================================
-# Step
-# =============================================================================
 
 
 class Step(StrictModel):
