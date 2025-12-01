@@ -34,35 +34,6 @@ def main(workflow: str, verbose: bool) -> None:
 
     raise click.Abort
 
-
-def get_line_info(location: str, line_map: dict[str, int]) -> str:
-    """Get line number information for a given location path.
-
-    Tries exact match first, then falls back to partial path matching
-    to handle union type discriminators in Pydantic error paths.
-
-    Args:
-        location: Dotted path location from error details.
-        line_map: Dictionary mapping paths to line numbers.
-
-    Returns:
-        Line number suffix (e.g., ":42") or empty string if not found.
-
-    """
-    if location in line_map:
-        return f":{line_map[location]}"
-
-    # Try to find the best partial match
-    # Remove union type discriminators and try again
-    path_parts = location.split(".")
-    for i in range(len(path_parts), 0, -1):
-        partial_path = ".".join(path_parts[:i])
-        if partial_path in line_map:
-            return f":{line_map[partial_path]}"
-
-    return ""
-
-
 def format_error(error: ErrorDetails, workflow: str, line_map: dict[str, int]) -> str:
     """Format a Pydantic error for display."""
     msg = error["msg"]
@@ -75,7 +46,43 @@ def format_error(error: ErrorDetails, workflow: str, line_map: dict[str, int]) -
     location = ".".join(str(segment) for segment in loc) if isinstance(loc, tuple) else loc
     line_info = get_line_info(location, line_map)
 
-    return f"{message}{line_info} at `{location}`"
+    return f"{message}:{line_info} at `{location}`"
+
+def get_line_info(location: str, line_map: dict[str, int]) -> int:
+    """Get line number information for a given location path.
+
+    Finds the most specific (longest) matching path in the line map.
+    This helps point to the deepest nested field causing validation errors.
+
+    Args:
+        location: Dotted path location from error details.
+        line_map: Dictionary mapping paths to line numbers.
+
+    Returns:
+        Line number suffix (e.g., ":42") or empty string if not found.
+
+    """
+    matching_keys = [
+        key for key in line_map
+        if key == location or key.startswith(f"{location}.")
+    ]
+
+    if not matching_keys:
+        path_parts = location.split(".")
+        for i in range(len(path_parts), 0, -1):
+            partial_path = ".".join(path_parts[:i])
+            if partial_path in line_map:
+                return line_map[partial_path]
+        return 0
+
+    non_index_keys = [key for key in matching_keys if not key.split(".")[-1].isdigit()]
+
+    if non_index_keys:
+        longest_key = max(non_index_keys, key=len)
+        return line_map[longest_key]
+
+    longest_key = max(matching_keys, key=len)
+    return line_map[longest_key]
 
 
 if __name__ == "__main__":

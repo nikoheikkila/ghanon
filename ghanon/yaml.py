@@ -80,10 +80,6 @@ class YamlLoader:
         path: list[str],
     ) -> dict[str, int]:
         line_map: dict[str, int] = {}
-        current_path = ".".join(path) if path else ""
-
-        if current_path:
-            line_map[current_path] = node.start_mark.line + 1
 
         for key_node, value_node in node.value:
             if isinstance(key_node, ScalarNode):
@@ -102,9 +98,6 @@ class YamlLoader:
         path: list[str],
     ) -> dict[str, int]:
         line_map: dict[str, int] = {}
-        current_path = ".".join(path) if path else ""
-        if current_path:
-            line_map[current_path] = node.start_mark.line + 1
 
         for index, item_node in enumerate(node.value):
             new_path = [*path, str(index)]
