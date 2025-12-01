@@ -66,8 +66,7 @@ ignore = [
     "S108",  # Probable insecure usage of temporary file or directory - false positive in tests
     "S101",  # Use of assert detected - asserts are used in tests
 ]
-"main.py" = [
-    "T201",  # Entrypoint is allowed to use print()
+"cli.py" = [
     "FBT001" # Boolean options in CLI are allowed
 ]
 
