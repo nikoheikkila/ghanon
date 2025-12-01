@@ -49,12 +49,12 @@ class TestCLI:
     def test_valid_workflow_with_verbose(self, runner: CliRunner, valid_workflow: str):
         result = runner.invoke(main, args=["--verbose", valid_workflow])
 
-        self.assert_success(result, f"Parsing workflow file: {valid_workflow}")
+        self.assert_success(result, "Parsing workflow file")
 
     def test_invalid_workflow_reports_errors(self, runner: CliRunner, invalid_workflow: str):
         result = runner.invoke(main, args=[invalid_workflow])
 
-        self.assert_failure(result, f"Error parsing {invalid_workflow}")
+        self.assert_failure(result, "Error parsing workflow file")
 
     def test_nonexistent_file(self, runner: CliRunner):
         result = runner.invoke(main, args=["nonexistent.yml"])

@@ -25,7 +25,7 @@ def main(workflow: str, verbose: bool) -> None:
     if result.success:
         return click.echo(f"{filepath} is a valid workflow.")
 
-    click.echo(f"Error parsing {filepath}. Found {len(result.errors)} error(s).{os.linesep}")
+    click.echo(f"Error parsing workflow file {filepath}. Found {len(result.errors)} error(s).{os.linesep}")
     for error in result.errors:
         msg = format_error(error, workflow, result.line_map)
         click.echo(msg)
