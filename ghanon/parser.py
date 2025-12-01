@@ -8,6 +8,7 @@ import yaml
 from pydantic_core import ErrorDetails, ValidationError
 
 from .domain.workflow import Workflow
+from .yaml import YamlLoader
 
 __all__ = [
     "ParsingResult",
@@ -22,6 +23,7 @@ class ParsingResult:
     workflow: Workflow | None = None
     success: bool = False
     errors: list[ErrorDetails] = field(default_factory=list)
+    line_map: dict[str, int] = field(default_factory=dict)
 
     @classmethod
     def with_success(cls, workflow: Workflow) -> ParsingResult:
@@ -29,25 +31,43 @@ class ParsingResult:
         return cls(workflow=workflow, success=True, errors=[])
 
     @classmethod
-    def with_errors(cls, error: ValidationError) -> ParsingResult:
+    def with_errors(cls, errors: list[ErrorDetails], line_map: dict[str, int] | None = None) -> ParsingResult:
         """Create a failed ParsingResult."""
-        return cls(workflow=None, success=False, errors=error.errors())
+        return cls(workflow=None, success=False, errors=errors, line_map=line_map or {})
 
 
 class WorkflowParser:
     """Parser for GitHub Actions Workflows."""
 
+    loader: YamlLoader
+
+    def __init__(self) -> None:
+        """Initialize the parser with a YAML loader."""
+        self.loader = YamlLoader()
+
     def parse(self, yaml_content: str) -> ParsingResult:
         """Parse a workflow dictionary into a ParsingResult."""
-        data = yaml.safe_load(yaml_content)
+        line_map = self.loader.build_line_map(yaml_content)
 
-        # Handle YAML 1.1 quirk: 'on' key is parsed as boolean True
-        # This is a known issue with GitHub Actions workflows
-        if True in data:
-            data["on"] = data.pop(True)
+        try:
+            data = self.loader.load(yaml_content)
+        except yaml.YAMLError as error:
+            return self._yaml_parsing_error(yaml_content, line_map, error)
 
         try:
             workflow = Workflow.model_validate(data)
             return ParsingResult.with_success(workflow)
         except ValidationError as error:
-            return ParsingResult.with_errors(error)
+            return ParsingResult.with_errors(error.errors(), line_map)
+
+    def _yaml_parsing_error(self, content: str, line_map: dict[str, int], error: Exception) -> ParsingResult:
+        errors: list[ErrorDetails] = [
+            {
+                "type": "yaml_error",
+                "loc": (),
+                "msg": f"Error parsing YAML: {error}",
+                "input": content,
+            },
+        ]
+
+        return ParsingResult.with_errors(errors, line_map)

@@ -29,6 +29,15 @@ class TestYamlParsing:
 
         self.assert_result_has_error(result, expected_error)
 
+    def test_invalid_yaml_returns_errors(self):
+        """Scenario: Invalid YAML syntax should still return errors."""
+        expected_error = "Error parsing YAML"
+        invalid_yaml = "name: Test\non:\n  push: [\n    invalid"
+
+        result = self.parse(invalid_yaml)
+
+        self.assert_result_has_error(result, expected_error)
+
     def read_file(self, filename: str) -> str:
         fixture_path = Path(__file__).parent / "fixtures" / filename
         return fixture_path.read_text()

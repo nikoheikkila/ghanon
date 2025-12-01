@@ -33,7 +33,7 @@ tasks:
       - ghanon/**/*.py
     cmds:
       - clear
-      - uv run pytest tests -q
+      - uv run pytest tests -q --no-cov
 
   test:update:
     desc: Update test snapshots
@@ -50,5 +50,6 @@ tasks:
 
   run:
     desc: Run the application
+    silent: true
     cmds:
       - uv run python main.py {{ .CLI_ARGS }}
