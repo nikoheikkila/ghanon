@@ -20,9 +20,9 @@ tasks:
       - uv run ruff format {{ .CLI_ARGS }}
 
   test:unit:
-    desc: Run tests
+    desc: Run tests with coverage
     cmds:
-      - uv run pytest tests -v
+      - uv run pytest tests
 
   test:watch:
     desc: Run tests in watch mode

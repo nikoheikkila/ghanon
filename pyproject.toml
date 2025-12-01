@@ -38,6 +38,7 @@ issues = "https://github.com/nikoheikkila/ghanon/issues"
 dev = [
     "assertpy>=1.1",
     "pytest>=9.0.1",
+    "pytest-cov>=6.0.0",
     "ruff>=0.14.7",
 ]
 
@@ -67,4 +68,26 @@ ignore = [
 "main.py" = [
     "T201",  # Entrypoint is allowed to use print()
     "FBT001" # Boolean options in CLI are allowed
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "--cov=ghanon",
+    "--cov-report=term-missing",
+    "--cov-report=html:coverage/html",
+    "--cov-report=json:coverage/coverage.json",
+    "--cov-report=markdown:coverage/coverage.md",
+    "--cov-fail-under=100",
+    "-v"
+]
+
+[tool.coverage.run]
+source = ["ghanon"]
+omit = [
+    "main.py",
+    "tests/*",
+    ".venv/*",
+    "*/site-packages/*",
+    "*/__pycache__/*",
 ]
