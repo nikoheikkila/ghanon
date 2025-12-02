@@ -1,3 +1,5 @@
+"""Feature: GitHub Actions Workflow Validation with Ghanon"""
+
 from pathlib import Path
 
 import pytest
@@ -20,6 +22,8 @@ def find(name: str) -> str:
 
 
 class TestValidWorkflows:
+    """Scenario Outline: Valid Cases"""
+
     def test_cli_help(self, runner: CliRunner):
         result = runner.invoke(main, args=["--help"])
 
@@ -43,7 +47,7 @@ class TestParsingErrors:
     @pytest.mark.parametrize(
         ("workflow", "expected_error"),
         [
-            (find("invalid_runner.yml"), r"Error parsing workflow file"),
+            (find("invalid_key.yml"), r"Error parsing workflow file"),
             (
                 find("workflow_with_push_branches.yml"),
                 r"Use the `pull_request` trigger instead of the `push\.branches` trigger",

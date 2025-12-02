@@ -1,4 +1,5 @@
 """Formatter for CLI output messages with color and style."""
+
 from colorama import Fore, Style
 
 
