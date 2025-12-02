@@ -1,5 +1,4 @@
 from assertpy import assert_that
-from pydantic import ValidationError
 
 from ghanon.domain.workflow import PermissionLevel, PermissionsEvent
 
@@ -41,13 +40,3 @@ class TestPermissions:
         assert_that(result.repository_projects).is_equal_to(PermissionLevel.READ)
         assert_that(result.security_events).is_equal_to(PermissionLevel.WRITE)
         assert_that(result.statuses).is_equal_to(PermissionLevel.WRITE)
-
-    def test_requires_contents_read_when_customizing_permissions(self):
-        permissions_without_contents = {
-            "actions": PermissionLevel.READ,
-            "issues": PermissionLevel.WRITE,
-        }
-
-        assert_that(PermissionsEvent.model_validate).raises(ValidationError).when_called_with(
-            permissions_without_contents,
-        ).contains("must set 'contents: read' when customizing permissions")

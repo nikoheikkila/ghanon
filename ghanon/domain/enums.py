@@ -60,6 +60,7 @@ class ErrorMessage(StrEnum):
         "Reusable workflow jobs should specify `contents: read` permission at minimum "
         "to satisfy the principle of least privilege"
     )
+    NO_CONTENTS_PERMISSION = "When modifying the default permissions, `contents: read/write` is explicitly required"
 
 
 class PermissionLevel(StrEnum):

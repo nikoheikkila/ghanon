@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any, Literal
+from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import Field, field_validator
 
@@ -16,6 +16,9 @@ from .matrix import Strategy
 from .runner import RunsOn
 from .step import Step
 from .types import EnvMapping, ExpressionSyntax, JobNeeds
+
+if TYPE_CHECKING:
+    from .permissions import Permissions
 
 __all__ = [
     "BaseJob",
@@ -33,7 +36,7 @@ class BaseJob(StrictModel):
         description=Description.JOB_NAME,
     )
     needs: JobNeeds | None = None
-    permissions: Any | None = None  # Using Any to avoid circular import with Permissions
+    permissions: Permissions | None = None
     concurrency: str | Concurrency | None = Field(
         default=None,
         description=Description.CONCURRENCY,

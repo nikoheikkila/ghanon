@@ -69,6 +69,10 @@ class TestErrorCases:
                 r"Reusable workflow jobs should specify `contents: read` permission at minimum "
                 r"to satisfy the principle of least privilege",
             ),
+            (
+                find("no_content_permissions.yml"),
+                r"When modifying the default permissions, `contents: read/write` is explicitly required",
+            ),
             ("nonexistent.yml", r"File 'nonexistent.yml' does not exist"),
             ("README.md", r"Input should be a valid dictionary or instance of Workflow"),
             ("pyproject.toml", r"Error parsing YAML"),

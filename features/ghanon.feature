@@ -27,3 +27,4 @@ Feature: GitHub Actions Workflow Validation with Ghanon
 			| secrets_inherit.yml             | Do not use `secrets: inherit` with reusable workflows as it can be insecure                                              |
 			| no_permissions.yml              | Jobs should specify `contents: read` permission at minimum to satisfy the principle of least privilege                   |
 			| no_permissions_reusable_job.yml | Reusable workflow jobs should specify `contents: read` permission at minimum to satisfy the principle of least privilege |
+			| no_content_permissions.yml      | When modifying the default permissions, `contents: read/write` is explicitly required                                    |
