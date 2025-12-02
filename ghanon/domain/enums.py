@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 __all__ = [
     "Architecture",
@@ -11,6 +11,7 @@ __all__ = [
     "CheckSuiteActivityType",
     "DiscussionActivityType",
     "DiscussionCommentActivityType",
+    "ErrorMessage",
     "EventType",
     "IssueCommentActivityType",
     "IssuesActivityType",
@@ -37,7 +38,14 @@ __all__ = [
 ]
 
 
-class PermissionLevel(str, Enum):
+class ErrorMessage(StrEnum):
+    """Validation error messages for workflow models."""
+
+    SECRETS_INHERIT = "Do not use `secrets: inherit` with reusable workflows as it can be insecure"
+    PUSH_BRANCHES = "Use the `pull_request` trigger instead of the `push.branches` trigger."
+
+
+class PermissionLevel(StrEnum):
     """Permission access levels for GITHUB_TOKEN."""
 
     READ = "read"
@@ -45,14 +53,14 @@ class PermissionLevel(str, Enum):
     NONE = "none"
 
 
-class PermissionAccess(str, Enum):
+class PermissionAccess(StrEnum):
     """Global permission access shortcuts."""
 
     READ_ALL = "read-all"
     WRITE_ALL = "write-all"
 
 
-class Architecture(str, Enum):
+class Architecture(StrEnum):
     """Supported architectures for runners."""
 
     ARM32 = "ARM32"
@@ -60,7 +68,7 @@ class Architecture(str, Enum):
     X86 = "x86"
 
 
-class Machine(str, Enum):
+class Machine(StrEnum):
     """Supported machine types."""
 
     LINUX = "linux"
@@ -68,7 +76,7 @@ class Machine(str, Enum):
     WINDOWS = "windows"
 
 
-class EventType(str, Enum):
+class EventType(StrEnum):
     """GitHub events that can trigger workflows.
 
     Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/events-that-trigger-workflows
@@ -110,7 +118,7 @@ class EventType(str, Enum):
     REPOSITORY_DISPATCH = "repository_dispatch"
 
 
-class ModelPermissionLevel(str, Enum):
+class ModelPermissionLevel(StrEnum):
     """Permission levels for models (restricted to read/none)."""
 
     READ = "read"
@@ -128,7 +136,7 @@ class ShellType(StrEnum):
     POWERSHELL = "powershell"
 
 
-class BranchProtectionRuleActivityType(str, Enum):
+class BranchProtectionRuleActivityType(StrEnum):
     """Activity types for branch_protection_rule events."""
 
     CREATED = "created"
@@ -136,7 +144,7 @@ class BranchProtectionRuleActivityType(str, Enum):
     DELETED = "deleted"
 
 
-class CheckRunActivityType(str, Enum):
+class CheckRunActivityType(StrEnum):
     """Activity types for check_run events."""
 
     CREATED = "created"
@@ -145,7 +153,7 @@ class CheckRunActivityType(str, Enum):
     REQUESTED_ACTION = "requested_action"
 
 
-class CheckSuiteActivityType(str, Enum):
+class CheckSuiteActivityType(StrEnum):
     """Activity types for check_suite events."""
 
     COMPLETED = "completed"
@@ -153,7 +161,7 @@ class CheckSuiteActivityType(str, Enum):
     REREQUESTED = "rerequested"
 
 
-class DiscussionActivityType(str, Enum):
+class DiscussionActivityType(StrEnum):
     """Activity types for discussion events."""
 
     CREATED = "created"
@@ -171,7 +179,7 @@ class DiscussionActivityType(str, Enum):
     UNANSWERED = "unanswered"
 
 
-class DiscussionCommentActivityType(str, Enum):
+class DiscussionCommentActivityType(StrEnum):
     """Activity types for discussion_comment events."""
 
     CREATED = "created"
@@ -179,7 +187,7 @@ class DiscussionCommentActivityType(str, Enum):
     DELETED = "deleted"
 
 
-class IssueCommentActivityType(str, Enum):
+class IssueCommentActivityType(StrEnum):
     """Activity types for issue_comment events."""
 
     CREATED = "created"
@@ -187,7 +195,7 @@ class IssueCommentActivityType(str, Enum):
     DELETED = "deleted"
 
 
-class IssuesActivityType(str, Enum):
+class IssuesActivityType(StrEnum):
     """Activity types for issues events."""
 
     OPENED = "opened"
@@ -208,7 +216,7 @@ class IssuesActivityType(str, Enum):
     DEMILESTONED = "demilestoned"
 
 
-class LabelActivityType(str, Enum):
+class LabelActivityType(StrEnum):
     """Activity types for label events."""
 
     CREATED = "created"
@@ -216,13 +224,13 @@ class LabelActivityType(str, Enum):
     DELETED = "deleted"
 
 
-class MergeGroupActivityType(str, Enum):
+class MergeGroupActivityType(StrEnum):
     """Activity types for merge_group events."""
 
     CHECKS_REQUESTED = "checks_requested"
 
 
-class MilestoneActivityType(str, Enum):
+class MilestoneActivityType(StrEnum):
     """Activity types for milestone events."""
 
     CREATED = "created"
@@ -232,7 +240,7 @@ class MilestoneActivityType(str, Enum):
     DELETED = "deleted"
 
 
-class ProjectActivityType(str, Enum):
+class ProjectActivityType(StrEnum):
     """Activity types for project events."""
 
     CREATED = "created"
@@ -243,7 +251,7 @@ class ProjectActivityType(str, Enum):
     DELETED = "deleted"
 
 
-class ProjectCardActivityType(str, Enum):
+class ProjectCardActivityType(StrEnum):
     """Activity types for project_card events."""
 
     CREATED = "created"
@@ -253,7 +261,7 @@ class ProjectCardActivityType(str, Enum):
     DELETED = "deleted"
 
 
-class ProjectColumnActivityType(str, Enum):
+class ProjectColumnActivityType(StrEnum):
     """Activity types for project_column events."""
 
     CREATED = "created"
@@ -262,7 +270,7 @@ class ProjectColumnActivityType(str, Enum):
     DELETED = "deleted"
 
 
-class PullRequestActivityType(str, Enum):
+class PullRequestActivityType(StrEnum):
     """Activity types for pull_request events."""
 
     ASSIGNED = "assigned"
@@ -288,7 +296,7 @@ class PullRequestActivityType(str, Enum):
     DEQUEUED = "dequeued"
 
 
-class PullRequestTargetActivityType(str, Enum):
+class PullRequestTargetActivityType(StrEnum):
     """Activity types for pull_request_target events."""
 
     ASSIGNED = "assigned"
@@ -310,7 +318,7 @@ class PullRequestTargetActivityType(str, Enum):
     AUTO_MERGE_DISABLED = "auto_merge_disabled"
 
 
-class PullRequestReviewActivityType(str, Enum):
+class PullRequestReviewActivityType(StrEnum):
     """Activity types for pull_request_review events."""
 
     SUBMITTED = "submitted"
@@ -318,7 +326,7 @@ class PullRequestReviewActivityType(str, Enum):
     DISMISSED = "dismissed"
 
 
-class PullRequestReviewCommentActivityType(str, Enum):
+class PullRequestReviewCommentActivityType(StrEnum):
     """Activity types for pull_request_review_comment events."""
 
     CREATED = "created"
@@ -326,14 +334,14 @@ class PullRequestReviewCommentActivityType(str, Enum):
     DELETED = "deleted"
 
 
-class RegistryPackageActivityType(str, Enum):
+class RegistryPackageActivityType(StrEnum):
     """Activity types for registry_package events."""
 
     PUBLISHED = "published"
     UPDATED = "updated"
 
 
-class ReleaseActivityType(str, Enum):
+class ReleaseActivityType(StrEnum):
     """Activity types for release events."""
 
     PUBLISHED = "published"
@@ -345,7 +353,7 @@ class ReleaseActivityType(str, Enum):
     RELEASED = "released"
 
 
-class WorkflowRunActivityType(str, Enum):
+class WorkflowRunActivityType(StrEnum):
     """Activity types for workflow_run events."""
 
     REQUESTED = "requested"
@@ -353,7 +361,7 @@ class WorkflowRunActivityType(str, Enum):
     IN_PROGRESS = "in_progress"
 
 
-class WorkflowDispatchInputType(str, Enum):
+class WorkflowDispatchInputType(StrEnum):
     """Input types for workflow_dispatch events."""
 
     STRING = "string"
@@ -363,7 +371,7 @@ class WorkflowDispatchInputType(str, Enum):
     ENVIRONMENT = "environment"
 
 
-class WorkflowCallInputType(str, Enum):
+class WorkflowCallInputType(StrEnum):
     """Input types for workflow_call events."""
 
     BOOLEAN = "boolean"

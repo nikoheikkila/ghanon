@@ -17,6 +17,7 @@ tasks:
   format:
     desc: Format the codebase
     cmds:
+      - uv run ruff check --fix {{ .CLI_ARGS }}
       - uv run ruff format {{ .CLI_ARGS }}
 
   test:unit:

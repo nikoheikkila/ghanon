@@ -15,7 +15,7 @@ from .base import StrictModel
 from .concurrency import Concurrency
 from .container import Container
 from .defaults import Defaults, DefaultsRun
-from .enums import EventType
+from .enums import ErrorMessage, EventType
 from .environment import Environment
 from .events import (
     BranchProtectionRuleActivityType,
@@ -229,8 +229,7 @@ class Workflow(StrictModel):
         has_pull_request = is_on_configuration and value.pull_request is not None
 
         if has_push_branches and not has_pull_request:
-            msg = "Use the `pull_request` trigger instead of the `push.branches` trigger."
-            raise ValueError(msg)
+            raise ValueError(ErrorMessage.PUSH_BRANCHES)
 
         return value
 

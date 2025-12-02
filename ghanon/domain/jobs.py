@@ -4,12 +4,13 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from .base import StrictModel
 from .concurrency import Concurrency
 from .container import Container
 from .defaults import Defaults
+from .enums import ErrorMessage
 from .environment import Environment
 from .matrix import Strategy
 from .runner import RunsOn
@@ -175,6 +176,19 @@ class ReusableWorkflowCallJob(StrictModel):
             "will run at a time."
         ),
     )
+
+    @field_validator("secrets")
+    @classmethod
+    def validate_secrets(cls, value: EnvMapping | Literal["inherit"] | None) -> EnvMapping | Literal["inherit"] | None:
+        """Validate that secrets are explicitly defined rather than inherited.
+
+        Using secrets: inherit passes all repository and organization secrets to the
+        reusable workflow, which violates the principle of least privilege and can
+        expose sensitive information to workflows that don't need it.
+        """
+        if value == "inherit":
+            raise ValueError(ErrorMessage.SECRETS_INHERIT)
+        return value
 
 
 Job = NormalJob | ReusableWorkflowCallJob
