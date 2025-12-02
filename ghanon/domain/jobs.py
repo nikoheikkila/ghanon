@@ -10,7 +10,7 @@ from .base import StrictModel
 from .concurrency import Concurrency
 from .container import Container
 from .defaults import Defaults
-from .enums import ErrorMessage
+from .enums import Description, ErrorMessage
 from .environment import Environment
 from .matrix import Strategy
 from .runner import RunsOn
@@ -18,13 +18,40 @@ from .step import Step
 from .types import EnvMapping, ExpressionSyntax, JobNeeds
 
 __all__ = [
+    "BaseJob",
     "Job",
     "NormalJob",
     "ReusableWorkflowCallJob",
 ]
 
 
-class NormalJob(StrictModel):
+class BaseJob(StrictModel):
+    """Base class for all job types with common fields."""
+
+    name: str | None = Field(
+        default=None,
+        description=Description.JOB_NAME,
+    )
+    needs: JobNeeds | None = None
+    permissions: Any | None = None  # Using Any to avoid circular import with Permissions
+    concurrency: str | Concurrency | None = Field(
+        default=None,
+        description=Description.CONCURRENCY,
+    )
+
+    def has_permissions(self) -> bool:
+        """Check if job has permissions defined."""
+        return self.permissions is not None
+
+    def get_missing_permissions_error(self) -> str:
+        """Get error message when permissions are missing.
+
+        Subclasses can override to provide job-type-specific error messages.
+        """
+        return ErrorMessage.NO_PERMISSIONS
+
+
+class NormalJob(BaseJob):
     """Standard job definition.
 
     Each job must have an id to associate with the job. The key job_id is a string
@@ -35,12 +62,6 @@ class NormalJob(StrictModel):
     Reference: https://help.github.com/en/github/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions#jobsjob_id
     """
 
-    name: str | None = Field(
-        default=None,
-        description="The name of the job displayed on GitHub.",
-    )
-    needs: JobNeeds | None = None
-    permissions: Any | None = None  # Using Any to avoid circular import with Permissions
     runs_on: RunsOn = Field(
         ...,
         alias="runs-on",
@@ -111,27 +132,18 @@ class NormalJob(StrictModel):
             "These are useful for creating databases or cache services like redis."
         ),
     )
-    concurrency: str | Concurrency | None = Field(
-        default=None,
-        description=(
-            "Concurrency ensures that only a single job or workflow using the same concurrency group "
-            "will run at a time."
-        ),
-    )
 
 
-class ReusableWorkflowCallJob(StrictModel):
+class ReusableWorkflowCallJob(BaseJob):
     """Job that calls a reusable workflow.
 
     Reference: https://docs.github.com/en/actions/learn-github-actions/reusing-workflows#calling-a-reusable-workflow
     """
 
-    name: str | None = Field(
-        default=None,
-        description="The name of the job displayed on GitHub.",
-    )
-    needs: JobNeeds | None = None
-    permissions: Any | None = None  # Using Any to avoid circular import with Permissions
+    def get_missing_permissions_error(self) -> str:
+        """Get error message specific to reusable workflow jobs."""
+        return ErrorMessage.NO_PERMISSIONS_REUSABLE
+
     if_: bool | int | float | str | None = Field(
         default=None,
         alias="if",
@@ -168,13 +180,6 @@ class ReusableWorkflowCallJob(StrictModel):
     strategy: Strategy | None = Field(
         default=None,
         description="A strategy creates a build matrix for your jobs.",
-    )
-    concurrency: str | Concurrency | None = Field(
-        default=None,
-        description=(
-            "Concurrency ensures that only a single job or workflow using the same concurrency group "
-            "will run at a time."
-        ),
     )
 
     @field_validator("secrets")

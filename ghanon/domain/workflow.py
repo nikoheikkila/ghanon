@@ -267,12 +267,11 @@ class Workflow(StrictModel):
         return self.permissions is not None
 
     def _validate_job_permissions(self) -> None:
-        """Validate that all normal jobs have permissions defined."""
+        """Validate that all jobs have permissions defined."""
         for job in self.jobs.values():
-            if self._is_normal_job_without_permissions(job):
-                raise ValueError(ErrorMessage.NO_PERMISSIONS)
+            self._check_job_permissions(job)
 
-    @staticmethod
-    def _is_normal_job_without_permissions(job: Job) -> bool:
-        """Check if job is a NormalJob without permissions."""
-        return isinstance(job, NormalJob) and job.permissions is None
+    def _check_job_permissions(self, job: Job) -> None:
+        """Check if a single job has required permissions."""
+        if not job.has_permissions():
+            raise ValueError(job.get_missing_permissions_error())

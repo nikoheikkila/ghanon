@@ -9,6 +9,7 @@ __all__ = [
     "BranchProtectionRuleActivityType",
     "CheckRunActivityType",
     "CheckSuiteActivityType",
+    "Description",
     "DiscussionActivityType",
     "DiscussionCommentActivityType",
     "ErrorMessage",
@@ -38,6 +39,15 @@ __all__ = [
 ]
 
 
+class Description(StrEnum):
+    """Common field descriptions used across workflow models."""
+
+    JOB_NAME = "The name of the job displayed on GitHub."
+    CONCURRENCY = (
+        "Concurrency ensures that only a single job or workflow using the same concurrency group will run at a time."
+    )
+
+
 class ErrorMessage(StrEnum):
     """Validation error messages for workflow models."""
 
@@ -45,6 +55,10 @@ class ErrorMessage(StrEnum):
     PUSH_BRANCHES = "Use the `pull_request` trigger instead of the `push.branches` trigger."
     NO_PERMISSIONS = (
         "Jobs should specify `contents: read` permission at minimum to satisfy the principle of least privilege"
+    )
+    NO_PERMISSIONS_REUSABLE = (
+        "Reusable workflow jobs should specify `contents: read` permission at minimum "
+        "to satisfy the principle of least privilege"
     )
 
 
