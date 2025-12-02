@@ -52,7 +52,7 @@ class TestErrorCases:
         [
             (find("invalid_key.yml"), r"Error parsing workflow file"),
             (
-                find("workflow_with_push_branches.yml"),
+                find("branch_trigger.yml"),
                 r"Use the `pull_request` trigger instead of the `push\.branches` trigger",
             ),
             ("nonexistent.yml", r"File 'nonexistent.yml' does not exist"),

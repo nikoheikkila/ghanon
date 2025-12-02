@@ -1,26 +1,27 @@
 Feature: GitHub Actions Workflow Validation with Ghanon
 
-    Scenario Outline: Valid Cases
-        Given a workflow "<workflow>"
-        When I parse it
-        Then the validation should pass
-        And I should see message "<workflow>" is a valid workflow
+	Scenario Outline: Valid Cases
+		Given a workflow "<workflow>"
+		When I parse it
+		Then the validation should pass
+		And I should see message "<workflow>" is a valid workflow
 
-        Examples:
-            | workflow             |
-            | simple_workflow.yml  |
-            | complex_workflow.yml |
+		Examples:
+			| workflow             |
+			| simple_workflow.yml  |
+			| complex_workflow.yml |
 
-    Scenario Outline: Error Cases
-        Given a workflow "<workflow>"
-        When I parse it
-        Then the validation should fail
-        And I should see message "<error>"
+	Scenario Outline: Error Cases
+		Given a workflow "<workflow>"
+		When I parse it
+		Then the validation should fail
+		And I should see message "<error>"
 
-        Examples:
-            | workflow                        | error                                                                 |
-            | invalid_key.yml                 | Error parsing workflow file                                           |
-            | workflow_with_push_branches.yml | Use the `pull_request` trigger instead of the `push.branches` trigger |
-            | nonexistent.yml                 | File 'nonexistent.yml' does not exist                                 |
-            | README.md                       | Input should be a valid dictionary or instance of Workflow            |
-            | pyproject.toml                  | Error parsing YAML                                                    |
+		Examples:
+			| workflow            | error                                                                       |
+			| nonexistent.yml     | File 'nonexistent.yml' does not exist                                       |
+			| README.md           | Input should be a valid dictionary or instance of Workflow                  |
+			| pyproject.toml      | Error parsing YAML                                                          |
+			| invalid_key.yml     | Error parsing workflow file                                                 |
+			| branch_trigger.yml  | Use the `pull_request` trigger instead of the `push.branches` trigger       |
+			| secrets_inherit.yml | Do not use `secrets: inherit` with reusable workflows as it can be insecure |
