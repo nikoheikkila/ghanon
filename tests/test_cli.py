@@ -2,11 +2,10 @@ from pathlib import Path
 
 import pytest
 from assertpy import assert_that
-from click.testing import CliRunner, Result
+from click import Command
+from click.testing import CliRunner
 
 from ghanon.cli import main
-
-FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
 
 @pytest.fixture
@@ -15,66 +14,54 @@ def runner() -> CliRunner:
     return CliRunner()
 
 
-@pytest.fixture
-def valid_workflow() -> str:
-    """Get path to a valid workflow file."""
-    return str(FIXTURES_DIR / "complex_workflow.yml")
+def find(name: str) -> str:
+    """Fixture providing the path to the workflow file."""
+    return str(Path(__file__).parent / "fixtures" / name)
 
 
-@pytest.fixture
-def invalid_workflow() -> str:
-    """Get path to an invalid workflow file."""
-    return str(FIXTURES_DIR / "invalid_runner.yml")
-
-
-@pytest.fixture
-def invalid_yaml_file() -> str:
-    """Get path to a workflow file with invalid YAML."""
-    return str(FIXTURES_DIR / "invalid.yml")
-
-
-class TestCLI:
+class TestValidWorkflows:
     def test_cli_help(self, runner: CliRunner):
         result = runner.invoke(main, args=["--help"])
 
-        self.assert_success(result, "Run Ghanon CLI.")
-        self.assert_success(result, r"-v, --verbose\s+Enable verbose output.")
-        self.assert_success(result, r"--help\s+Show this message and exit.")
+        assert_that(result).has_exit_code(0)
+        (
+            assert_that(result.output)
+            .contains("Run Ghanon CLI.")
+            .matches(r"-v, --verbose\s+Enable verbose output.")
+            .matches(r"--help\s+Show this message and exit.")
+        )
 
-    def test_valid_workflow(self, runner: CliRunner, valid_workflow: str):
-        result = runner.invoke(main, args=[valid_workflow])
+    def test_valid_workflow(self, runner: CliRunner):
+        result = runner.invoke(main, args=[find("complex_workflow.yml")])
 
-        self.assert_success(result, "is a valid workflow")
+        assert_that(result).has_exit_code(0)
+        assert_that(result.output).matches(r"is a valid workflow")
 
-    def test_valid_workflow_with_verbose(self, runner: CliRunner, valid_workflow: str):
-        result = runner.invoke(main, args=["--verbose", valid_workflow])
+    def test_valid_workflow_with_verbose(self, runner: CliRunner):
+        result = runner.invoke(main, args=["--verbose", find("complex_workflow.yml")])
 
-        self.assert_success(result, "Parsing workflow file")
+        assert_that(result).has_exit_code(0)
+        assert_that(result.output).matches(r"Parsing workflow file")
 
-    def test_invalid_workflow_reports_errors(self, runner: CliRunner, invalid_workflow: str):
-        result = runner.invoke(main, args=[invalid_workflow])
 
-        self.assert_failure(result, "Error parsing workflow file")
+class TestParsingErrors:
+    @pytest.mark.parametrize(
+        ("workflow", "expected_error"),
+        [
+            (find("invalid_runner.yml"), r"Error parsing workflow file"),
+            (
+                find("workflow_with_push_branches.yml"),
+                r"Use the `pull_request` trigger instead of the `push\.branches` trigger",
+            ),
+            ("nonexistent.yml", r"File 'nonexistent.yml' does not exist"),
+            ("README.md", r"Input should be a valid dictionary or instance of Workflow"),
+            ("pyproject.toml", r"Error parsing YAML"),
+        ],
+    )
+    def test_raises_error(self, runner: CliRunner, workflow: str, expected_error: str):
+        assert isinstance(main, Command)
 
-    def test_nonexistent_file(self, runner: CliRunner):
-        result = runner.invoke(main, args=["nonexistent.yml"])
+        result = runner.invoke(main, args=[workflow])
 
-        self.assert_failure(result, "File 'nonexistent.yml' does not exist", exit_code=2)
-
-    def test_workflow_with_a_markdown_file(self, runner: CliRunner):
-        result = runner.invoke(main, args=["README.md"])
-
-        self.assert_failure(result, "Input should be a valid dictionary or instance of Workflow")
-
-    def test_workflow_with_a_toml_file(self, runner: CliRunner):
-        result = runner.invoke(main, args=["pyproject.toml"])
-
-        self.assert_failure(result, "Error parsing YAML")
-
-    def assert_success(self, result: Result, message: str) -> None:
-        assert_that(result.exit_code).is_equal_to(0)
-        assert_that(result.output).matches(message)
-
-    def assert_failure(self, result: Result, message: str, exit_code=1) -> None:
-        assert_that(result.exit_code).is_equal_to(exit_code)
-        assert_that(result.output).matches(message)
+        assert_that(result).has_exit_code(1)
+        assert_that(result.output).matches(expected_error)

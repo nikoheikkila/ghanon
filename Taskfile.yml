@@ -32,8 +32,7 @@ tasks:
       - tests/**/*.py
       - ghanon/**/*.py
     cmds:
-      - clear
-      - uv run pytest tests -q --no-cov
+      - uv run pytest tests -qq --no-cov
 
   test:update:
     desc: Update test snapshots

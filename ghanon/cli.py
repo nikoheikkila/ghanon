@@ -10,11 +10,16 @@ from ghanon.parser import WorkflowParser
 
 
 @click.command()
-@click.argument("workflow", type=click.Path(exists=True, file_okay=True, dir_okay=False))
+@click.argument("workflow", type=click.Path())
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output.")
 def main(workflow: str, verbose: bool) -> None:
     """Run Ghanon CLI."""
     filepath = Path(workflow)
+
+    if not filepath.is_file():
+        click.echo(f"File '{filepath}' does not exist")
+        raise click.Abort
+
     parser = WorkflowParser()
 
     if verbose:
