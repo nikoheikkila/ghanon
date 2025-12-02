@@ -16,7 +16,7 @@ class Logger:
 
     def log(self, *messages: str) -> None:
         """Log a generic message."""
-        echo(messages)
+        echo(" ".join(messages), color=True)
 
     def info(self, string: str) -> None:
         """Log an informational message."""

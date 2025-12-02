@@ -32,7 +32,7 @@ def main(workflow: str, verbose: bool) -> None:
     result = parser.parse(filepath.read_text())
 
     if result.success:
-        return logger.success(formatter.success(f"{filepath} is a valid workflow."))
+        return logger.success(f"{filepath} is a valid workflow.")
 
     logger.error(f"Error parsing workflow file {filepath}. Found {len(result.errors)} error(s).{os.linesep}")
     for error in result.errors:
