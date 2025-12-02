@@ -32,15 +32,6 @@ class TestReusableWorkflowCallJob:
 
         assert_that(job.with_).contains_entry({"environment": environment})
 
-    def test_secrets_inherit_raises_validation_error(self, minimal_config):
-        with pytest.raises(ValueError, match="do not use 'secrets: inherit' as it can be insecure"):
-            ReusableWorkflowCallJob.model_validate(
-                {
-                    **minimal_config,
-                    "secrets": "inherit",
-                },
-            )
-
     def test_secrets_explicit(self, minimal_config):
         value = "${{ secrets.API_KEY }}"
         key = "API_KEY"

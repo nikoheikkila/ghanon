@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field
 
 from .base import StrictModel
 from .concurrency import Concurrency
@@ -175,15 +175,6 @@ class ReusableWorkflowCallJob(StrictModel):
             "will run at a time."
         ),
     )
-
-    @field_validator("secrets")
-    @classmethod
-    def validate_secrets(cls, value: EnvMapping | Literal["inherit"] | None) -> EnvMapping | Literal["inherit"] | None:
-        """Validate secrets field."""
-        if value == "inherit":
-            msg = "do not use 'secrets: inherit' as it can be insecure"
-            raise ValueError(msg)
-        return value
 
 
 Job = NormalJob | ReusableWorkflowCallJob
