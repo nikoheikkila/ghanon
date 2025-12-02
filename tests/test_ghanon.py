@@ -21,7 +21,7 @@ def find(name: str) -> str:
     return str(Path(__file__).parent / "fixtures" / name)
 
 
-class TestValidWorkflows:
+class TestValidCases:
     """Scenario Outline: Valid Cases"""
 
     def test_cli_help(self, runner: CliRunner):
@@ -30,8 +30,9 @@ class TestValidWorkflows:
         assert_that(result).has_exit_code(0)
         assert_that(result.output).snapshot("test_cli_help_output")
 
-    def test_valid_workflow(self, runner: CliRunner):
-        result = runner.invoke(main, args=[find("complex_workflow.yml")])
+    @pytest.mark.parametrize("workflow", ["simple_workflow.yml", "complex_workflow.yml"])
+    def test_valid_workflow(self, runner: CliRunner, workflow: str):
+        result = runner.invoke(main, args=[find(workflow)])
 
         assert_that(result).has_exit_code(0)
         assert_that(result.output).matches(r"is a valid workflow")
@@ -43,7 +44,9 @@ class TestValidWorkflows:
         assert_that(result.output).matches(r"Parsing workflow file")
 
 
-class TestParsingErrors:
+class TestErrorCases:
+    """Scenario Outline: Error Cases"""
+
     @pytest.mark.parametrize(
         ("workflow", "expected_error"),
         [

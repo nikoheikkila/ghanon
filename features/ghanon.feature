@@ -21,3 +21,6 @@ Feature: GitHub Actions Workflow Validation with Ghanon
             | workflow                        | error                                                                 |
             | invalid_key.yml                 | Error parsing workflow file                                           |
             | workflow_with_push_branches.yml | Use the `pull_request` trigger instead of the `push.branches` trigger |
+            | nonexistent.yml                 | File 'nonexistent.yml' does not exist                                 |
+            | README.md                       | Input should be a valid dictionary or instance of Workflow            |
+            | pyproject.toml                  | Error parsing YAML                                                    |
