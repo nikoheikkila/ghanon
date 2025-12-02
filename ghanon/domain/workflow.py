@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 from typing import Annotated
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from .base import StrictModel
 from .concurrency import Concurrency
@@ -248,3 +248,31 @@ class Workflow(StrictModel):
                     msg,
                 )
         return v
+
+    @model_validator(mode="after")
+    def validate_permissions(self) -> Workflow:
+        """Validate that permissions are defined at workflow or job level.
+
+        Ensures the principle of least privilege by requiring explicit permissions
+        configuration either globally (workflow-level) or per-job.
+        """
+        if self._has_workflow_permissions():
+            return self
+
+        self._validate_job_permissions()
+        return self
+
+    def _has_workflow_permissions(self) -> bool:
+        """Check if workflow-level permissions are defined."""
+        return self.permissions is not None
+
+    def _validate_job_permissions(self) -> None:
+        """Validate that all normal jobs have permissions defined."""
+        for job in self.jobs.values():
+            if self._is_normal_job_without_permissions(job):
+                raise ValueError(ErrorMessage.NO_PERMISSIONS)
+
+    @staticmethod
+    def _is_normal_job_without_permissions(job: Job) -> bool:
+        """Check if job is a NormalJob without permissions."""
+        return isinstance(job, NormalJob) and job.permissions is None

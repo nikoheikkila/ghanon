@@ -50,6 +50,7 @@ class TestWorkflowModel:
         workflow_data = {
             "name": "Test",
             "on": "push",
+            "permissions": {"contents": "read"},
             "jobs": {
                 job_id: {
                     "runs-on": "ubuntu-latest",

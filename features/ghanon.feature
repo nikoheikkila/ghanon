@@ -18,10 +18,11 @@ Feature: GitHub Actions Workflow Validation with Ghanon
 		And I should see message "<error>"
 
 		Examples:
-			| workflow            | error                                                                       |
-			| nonexistent.yml     | File 'nonexistent.yml' does not exist                                       |
-			| README.md           | Input should be a valid dictionary or instance of Workflow                  |
-			| pyproject.toml      | Error parsing YAML                                                          |
-			| invalid_key.yml     | Error parsing workflow file                                                 |
-			| branch_trigger.yml  | Use the `pull_request` trigger instead of the `push.branches` trigger       |
-			| secrets_inherit.yml | Do not use `secrets: inherit` with reusable workflows as it can be insecure |
+			| workflow            | error                                                                                                  |
+			| nonexistent.yml     | File 'nonexistent.yml' does not exist                                                                  |
+			| README.md           | Input should be a valid dictionary or instance of Workflow                                             |
+			| pyproject.toml      | Error parsing YAML                                                                                     |
+			| invalid_key.yml     | Error parsing workflow file                                                                            |
+			| branch_trigger.yml  | Use the `pull_request` trigger instead of the `push.branches` trigger                                  |
+			| secrets_inherit.yml | Do not use `secrets: inherit` with reusable workflows as it can be insecure                            |
+			| no_permissions.yml  | Jobs should specify `contents: read` permission at minimum to satisfy the principle of least privilege |

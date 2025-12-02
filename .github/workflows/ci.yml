@@ -16,6 +16,9 @@ jobs:
       matrix:
         runner: [ubuntu-latest, windows-latest, macos-latest]
 
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
