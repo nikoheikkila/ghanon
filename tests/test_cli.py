@@ -24,12 +24,7 @@ class TestValidWorkflows:
         result = runner.invoke(main, args=["--help"])
 
         assert_that(result).has_exit_code(0)
-        (
-            assert_that(result.output)
-            .contains("Run Ghanon CLI.")
-            .matches(r"-v, --verbose\s+Enable verbose output.")
-            .matches(r"--help\s+Show this message and exit.")
-        )
+        assert_that(result.output).snapshot("test_cli_help_output")
 
     def test_valid_workflow(self, runner: CliRunner):
         result = runner.invoke(main, args=[find("complex_workflow.yml")])

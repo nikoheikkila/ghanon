@@ -23,6 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "click>=8.3.1",
+    "colorama>=0.4.6",
     "pydantic>=2.12.5",
     "pyyaml>=6.0.2",
 ]
@@ -51,20 +52,21 @@ select = ["ALL"]
 ignore = [
     "N999", # Module naming
     "TC001", # Type-checking blocks
-    "TC002" # Type-checking blocks
+    "TC002", # Type-checking blocks
+    "G004"  # Use of f-string with logging functions
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = [
-    "D100",  # Missing docstring in public module - not required in tests
-    "D101",  # Missing docstring in public class - not required in tests
-    "D102",  # Missing docstring in public method - not required in tests
-    "D400",  # First line should end with a period - not required in tests
-    "D415",  # First line should end with a period - not required in tests
-    "ANN001",  # Missing type annotation for function argument - not required in tests
-    "ANN201",  # Missing return type annotation for public function - not required in tests
-    "S108",  # Probable insecure usage of temporary file or directory - false positive in tests
-    "S101",  # Use of assert detected - asserts are used in tests
+    "D100", # Missing docstring in public module - not required in tests
+    "D101", # Missing docstring in public class - not required in tests
+    "D102", # Missing docstring in public method - not required in tests
+    "D400", # First line should end with a period - not required in tests
+    "D415", # First line should end with a period - not required in tests
+    "ANN001", # Missing type annotation for function argument - not required in tests
+    "ANN201", # Missing return type annotation for public function - not required in tests
+    "S108", # Probable insecure usage of temporary file or directory - false positive in tests
+    "S101", # Use of assert detected - asserts are used in tests
 ]
 "cli.py" = [
     "FBT001" # Boolean options in CLI are allowed

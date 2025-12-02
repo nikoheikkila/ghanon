@@ -1,0 +1,1 @@
+"Usage: main [OPTIONS] WORKFLOW\n\n  Run Ghanon CLI.\n\nOptions:\n  -v, --verbose  Enable verbose output.\n  --help         Show this message and exit.\n"

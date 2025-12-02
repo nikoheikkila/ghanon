@@ -6,7 +6,12 @@ from pathlib import Path
 import click
 from pydantic_core import ErrorDetails
 
+from ghanon.formatter import Formatter
+from ghanon.logger import Logger
 from ghanon.parser import WorkflowParser
+
+formatter = Formatter()
+logger = Logger(formatter)
 
 
 @click.command()
@@ -17,24 +22,22 @@ def main(workflow: str, verbose: bool) -> None:
     filepath = Path(workflow)
 
     if not filepath.is_file():
-        click.echo(f"File '{filepath}' does not exist")
-        raise click.Abort
+        logger.fatal(f"File '{filepath}' does not exist")
 
     parser = WorkflowParser()
 
     if verbose:
-        click.echo(f"Parsing workflow file: {filepath}")
+        logger.info(f"Parsing workflow file: {filepath}")
 
     result = parser.parse(filepath.read_text())
 
     if result.success:
-        return click.echo(f"{filepath} is a valid workflow.")
+        return logger.success(formatter.success(f"{filepath} is a valid workflow."))
 
-    click.echo(f"Error parsing workflow file {filepath}. Found {len(result.errors)} error(s).{os.linesep}")
+    logger.error(f"Error parsing workflow file {filepath}. Found {len(result.errors)} error(s).{os.linesep}")
     for error in result.errors:
         msg = format_error(error, workflow, result.line_map)
-        click.echo(msg)
-        click.echo(os.linesep)
+        logger.log(msg, os.linesep)
 
     raise click.Abort
 
@@ -43,7 +46,7 @@ def format_error(error: ErrorDetails, workflow: str, line_map: dict[str, int]) -
     """Format a Pydantic error for display."""
     msg = error["msg"]
     loc = error["loc"]
-    message = f"{msg} {os.linesep}  --> {workflow}"
+    message = f"{formatter.bold(msg)} {os.linesep}  --> {formatter.warning(workflow)}"
 
     if not loc:
         return message
