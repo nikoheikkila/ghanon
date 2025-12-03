@@ -48,6 +48,16 @@ jobs:
       - name: Run commandline test
         run: task run -- .github/workflows/ci.yml
 
+      - name: Test package installation
+        shell: bash
+        if: matrix.runner != 'windows-latest'
+        run: ./scripts/test-install.sh
+
+      - name: Test package installation (Windows)
+        if: matrix.runner == 'windows-latest'
+        shell: pwsh
+        run: ./scripts/test-install.ps1
+
       - name: Upload coverage to Coveralls
         if: matrix.runner == 'ubuntu-latest'
         uses: coverallsapp/github-action@v2
