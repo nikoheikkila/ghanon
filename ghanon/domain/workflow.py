@@ -15,7 +15,7 @@ from .base import StrictModel
 from .concurrency import Concurrency
 from .container import Container
 from .defaults import Defaults, DefaultsRun
-from .enums import ErrorMessage, EventType
+from .enums import EventType
 from .environment import Environment
 from .events import (
     BranchProtectionRuleActivityType,
@@ -215,23 +215,6 @@ class Workflow(StrictModel):
             "You can modify the default permissions granted to the GITHUB_TOKEN, adding or removing access as required."
         ),
     )
-
-    @field_validator("on")
-    @classmethod
-    def validate_on(cls, value: On) -> On:
-        """Validate workflow triggers.
-
-        Ensures that workflows using push.branches also include pull_request trigger
-        to avoid redundant CI runs and follow GitHub Actions best practices.
-        """
-        is_on_configuration = isinstance(value, OnConfiguration)
-        has_push_branches = is_on_configuration and value.push is not None and value.push.branches is not None
-        has_pull_request = is_on_configuration and value.pull_request is not None
-
-        if has_push_branches and not has_pull_request:
-            raise ValueError(ErrorMessage.PUSH_BRANCHES)
-
-        return value
 
     @field_validator("jobs")
     @classmethod

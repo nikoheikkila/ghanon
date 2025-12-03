@@ -52,7 +52,6 @@ class ErrorMessage(StrEnum):
     """Validation error messages for workflow models."""
 
     SECRETS_INHERIT = "Do not use `secrets: inherit` with reusable workflows as it can be insecure"
-    PUSH_BRANCHES = "Use the `pull_request` trigger instead of the `push.branches` trigger."
     NO_PERMISSIONS = (
         "Jobs should specify `contents: read` permission at minimum to satisfy the principle of least privilege"
     )

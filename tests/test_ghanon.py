@@ -52,10 +52,6 @@ class TestErrorCases:
         [
             (find("invalid_key.yml"), r"Error parsing workflow file"),
             (
-                find("branch_trigger.yml"),
-                r"Use the `pull_request` trigger instead of the `push\.branches` trigger",
-            ),
-            (
                 find("secrets_inherit.yml"),
                 r"Do not use `secrets: inherit` with reusable workflows as it can be insecure",
             ),

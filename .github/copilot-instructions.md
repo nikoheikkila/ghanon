@@ -206,23 +206,6 @@ def validate_secrets(cls, value):
     return value
 ```
 
-Example from `workflow.py` showing cross-field validation:
-
-```python
-@field_validator("on")
-@classmethod
-def validate_on(cls, value: On) -> On:
-    """Ensure workflows using push.branches also include pull_request."""
-    is_on_configuration = isinstance(value, OnConfiguration)
-    has_push_branches = is_on_configuration and value.push is not None and value.push.branches is not None
-    has_pull_request = is_on_configuration and value.pull_request is not None
-
-    if has_push_branches and not has_pull_request:
-        raise ValueError(ErrorMessage.PUSH_BRANCHES)
-
-    return value
-```
-
 ### Updating the GitHub Actions Schema
 
 The domain models implement the [official GitHub Actions schema](https://json.schemastore.org/github-workflow.json).

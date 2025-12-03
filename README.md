@@ -24,7 +24,6 @@ Ghanon is a powerful linter for GitHub Actions workflows that goes beyond basic 
 ### Best Practices Enforced
 
 - ❌ Discourages `secrets: inherit` (principle of least privilege)
-- ✅ Requires `pull_request` trigger when using `push` with branches
 - 🔍 Validates job IDs, step configurations, and runner specifications
 - 🛡️ Checks permissions, concurrency settings, and environment configurations
 
@@ -108,9 +107,6 @@ When Ghanon finds issues in your workflow:
 
 Error at line 15 (jobs.build.secrets):
   Do not use `secrets: inherit`. Define secrets explicitly for principle of least privilege.
-
-Error at line 5 (on):
-  Use the `pull_request` trigger instead of or alongside `push.branches` for better CI feedback.
 ```
 
 ## 🛠️ Development
