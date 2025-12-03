@@ -5,6 +5,11 @@ Feature: GitHub Actions Workflow Validation with Ghanon
 		When I run without arguments
 		Then I should see all the workflows under `.github/workflows` validated
 
+	Scenario: Multiple Positional Arguments
+		Given I have installed the CLI
+		When I pass it two valid workflows
+		Then I should see two workflows validated
+
 	Scenario Outline: Valid Cases
 		Given a workflow "<workflow>"
 		When I parse it

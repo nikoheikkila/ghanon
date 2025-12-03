@@ -35,6 +35,24 @@ class TestWithoutArguments:
         assert_that(result.output).matches(r"is a valid workflow")
 
 
+class TestMultiplePositionalArguments:
+    """Scenario: Multiple Positional Arguments"""
+
+    def test_pass_two_valid_workflows_validates_both(
+        self,
+        runner: CliRunner,
+    ) -> None:
+        result = runner.invoke(
+            main,
+            args=[find("simple_workflow.yml"), find("complex_workflow.yml")],
+        )
+
+        assert_that(result).has_exit_code(0)
+        assert_that(result.output).contains("simple_workflow.yml")
+        assert_that(result.output).contains("complex_workflow.yml")
+        assert_that(result.output).matches(r"is a valid workflow")
+
+
 class TestValidCases:
     """Scenario Outline: Valid Cases"""
 
@@ -42,7 +60,7 @@ class TestValidCases:
         result = runner.invoke(main, args=["--help"])
 
         assert_that(result).has_exit_code(0)
-        assert_that(result.output).contains("Usage: main [OPTIONS] [WORKFLOW]")
+        assert_that(result.output).contains("Usage: main [OPTIONS] [WORKFLOWS]")
         assert_that(result.output).contains("Run Ghanon CLI.")
 
     @pytest.mark.parametrize("workflow", ["simple_workflow.yml", "complex_workflow.yml"])
