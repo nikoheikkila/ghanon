@@ -45,8 +45,11 @@ jobs:
       - name: Run unit tests
         run: task test:unit
 
+      - name: Install locally
+        run: uv tool install .
+
       - name: Run commandline test
-        run: task run -- .github/workflows/ci.yml
+        run: ghanon .github/workflows/ci.yml
 
       - name: Test package installation
         shell: bash

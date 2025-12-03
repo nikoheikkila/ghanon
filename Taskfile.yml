@@ -53,9 +53,3 @@ tasks:
       - task: format
       - task: lint
       - task: test:unit
-
-  run:
-    desc: Run the application
-    silent: true
-    cmds:
-      - uv run python main.py {{ .CLI_ARGS }}

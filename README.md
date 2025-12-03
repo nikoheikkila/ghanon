@@ -132,7 +132,8 @@ cd ghanon
 task install
 
 # Run the linter
-task run -- path/to/workflow.yml
+uv tool install .
+ghanon path/to/workflow.yml
 ```
 
 ### Testing
