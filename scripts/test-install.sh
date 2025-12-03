@@ -43,7 +43,7 @@ pip install --quiet dist/*.whl
 
 # Test import
 echo "==> Testing package import"
-python3 -c "from ghanon.cli import main; print('✓ Import successful')"
+python3 -c "from ghanon.cli import main; print('Import successful')"
 
 echo "==> Installation test completed successfully"
 

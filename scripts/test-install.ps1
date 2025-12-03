@@ -43,7 +43,7 @@ try {
 
     # Test import
     Write-Host "==> Testing package import"
-    python -c "from ghanon.cli import main; print('✓ Import successful')"
+    python -c "from ghanon.cli import main; print('Import successful')"
 
     Write-Host "==> Installation test completed successfully"
 }
