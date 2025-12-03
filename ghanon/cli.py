@@ -8,36 +8,87 @@ from pydantic_core import ErrorDetails
 
 from ghanon.formatter import Formatter
 from ghanon.logger import Logger
-from ghanon.parser import WorkflowParser
+from ghanon.parser import ParsingResult, WorkflowParser
 
 formatter = Formatter()
 logger = Logger(formatter)
 
 
 @click.command()
-@click.argument("workflow", type=click.Path())
+@click.argument("workflow", type=click.Path(), required=False)
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose output.")
 def main(workflow: str, verbose: bool) -> None:
     """Run Ghanon CLI."""
+    if workflow:
+        return validate_single_workflow(workflow, verbose)
+
+    return validate_all_workflows()
+
+
+def validate_single_workflow(workflow: str, verbose: bool) -> None:
+    """Validate a single workflow file.
+
+    Args:
+        workflow: Path to the workflow file to validate.
+        verbose: Whether to enable verbose output.
+
+    """
     filepath = Path(workflow)
 
     if not filepath.is_file():
         logger.fatal(f"File '{filepath}' does not exist")
 
-    parser = WorkflowParser()
-
     if verbose:
         logger.info(f"Parsing workflow file: {filepath}")
 
-    result = parser.parse(filepath.read_text())
+    result = parse(filepath)
 
     if result.success:
         return logger.success(f"{filepath} is a valid workflow.")
 
-    logger.error(f"Error parsing workflow file {filepath}. Found {len(result.errors)} error(s).{os.linesep}")
+    return handle_validation_errors(result, workflow)
+
+
+def validate_all_workflows() -> None:
+    """Validate all workflow files in .github/workflows directory."""
+    workflows_dir = Path.cwd() / ".github" / "workflows"
+
+    for workflow in workflows_dir.glob("*.yml"):
+        result = parse(workflow)
+
+        if result.success:
+            logger.success(f"{workflow} is a valid workflow.")
+
+
+def parse(filepath: Path) -> ParsingResult:
+    """Parse a workflow file and return the parsing result."""
+    parser = WorkflowParser()
+    return parser.parse(filepath.read_text())
+
+
+def log_validation_errors(result: ParsingResult, workflow: str) -> None:
+    """Log validation errors without aborting.
+
+    Args:
+        result: Parsing result containing errors.
+        workflow: Path to the workflow file being validated.
+
+    """
+    logger.error(f"Error parsing workflow file {workflow}. Found {len(result.errors)} error(s).{os.linesep}")
     for error in result.errors:
         msg = format_error(error, workflow, result.line_map)
         logger.log(msg, os.linesep)
+
+
+def handle_validation_errors(result: ParsingResult, workflow: str) -> None:
+    """Handle validation errors by logging them and aborting.
+
+    Args:
+        result: Parsing result containing errors.
+        workflow: Path to the workflow file being validated.
+
+    """
+    log_validation_errors(result, workflow)
 
     raise click.Abort
 

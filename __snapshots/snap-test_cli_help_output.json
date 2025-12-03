@@ -1,1 +1,8 @@
-"Usage: main [OPTIONS] WORKFLOW\n\n  Run Ghanon CLI.\n\nOptions:\n  -v, --verbose  Enable verbose output.\n  --help         Show this message and exit.\n"
+"Usage: main [OPTIONS] [WORKFLOW]
+
+  Run Ghanon CLI.
+
+Options:
+  -v, --verbose  Enable verbose output.
+  --help         Show this message and exit.
+"
