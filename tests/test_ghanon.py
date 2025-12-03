@@ -74,7 +74,7 @@ class TestErrorCases:
                 r"When modifying the default permissions, `contents: read/write` is explicitly required",
             ),
             ("nonexistent.yml", r"File 'nonexistent.yml' does not exist"),
-            ("README.md", r"Input should be a valid dictionary or instance of Workflow"),
+            (find("not_a_workflow.md"), r"Input should be a valid dictionary or instance of Workflow"),
             ("pyproject.toml", r"Error parsing YAML"),
         ],
     )
