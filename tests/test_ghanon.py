@@ -31,8 +31,7 @@ class TestWithoutArguments:
         result = runner.invoke(main, args=[])
 
         assert_that(result).has_exit_code(0)
-        assert_that(result.output).contains(".github/workflows/ci.yml")
-        assert_that(result.output).matches(r"is a valid workflow")
+        assert_that(result.output).matches(r".+\.ya?ml is a valid workflow")
 
 
 class TestMultiplePositionalArguments:

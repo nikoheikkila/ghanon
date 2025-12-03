@@ -170,7 +170,7 @@ class Ghanon:
         result = self._parse(workflow)
 
         if result.success:
-            return self.logger.success(f"{workflow} is a valid workflow.")
+            return self.logger.success(f"{workflow.name} is a valid workflow.")
 
         return self.error_handler.handle(result, workflow)
 
