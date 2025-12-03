@@ -18,9 +18,13 @@ tasks:
   format:
     desc: Format the codebase
     cmds:
-      - uv run pyrefly infer
       - uv run ruff check --fix
       - uv run ruff format
+
+  typecheck:
+    desc: Infer missing types
+    cmds:
+      - uv run pyrefly infer
 
   test:unit:
     desc: Run tests with coverage
