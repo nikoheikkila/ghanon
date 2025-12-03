@@ -4,7 +4,7 @@ from ghanon.domain.workflow import PermissionLevel, PermissionsEvent
 
 
 class TestPermissions:
-    def test_all_permissions(self):
+    def test_all_permissions(self) -> None:
         permissions = {
             "actions": PermissionLevel.READ,
             "attestations": PermissionLevel.WRITE,

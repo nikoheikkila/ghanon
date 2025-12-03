@@ -6,7 +6,7 @@ from ghanon.domain.workflow import PullRequestActivityType, PullRequestEvent
 class TestPullRequestEvent:
     """Tests for pull_request event configuration."""
 
-    def test_types(self):
+    def test_types(self) -> None:
         types = [
             PullRequestActivityType.OPENED,
             PullRequestActivityType.SYNCHRONIZE,
@@ -15,7 +15,7 @@ class TestPullRequestEvent:
         event = PullRequestEvent.model_validate({"types": types})
         assert_that(event.types).contains(*types)
 
-    def test_all_filters(self):
+    def test_all_filters(self) -> None:
         event = PullRequestEvent.model_validate(
             {
                 "types": [PullRequestActivityType.OPENED],

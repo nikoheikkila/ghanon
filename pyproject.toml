@@ -44,6 +44,7 @@ dev = [
     "pytest>=9.0.1",
     "pytest-cov>=6.0.0",
     "ruff>=0.14.7",
+    "pyrefly>=0.44.0",
 ]
 
 [tool.ruff]
@@ -57,6 +58,13 @@ ignore = [
     "TC001", # Type-checking blocks
     "TC002", # Type-checking blocks
     "G004"  # Use of f-string with logging functions
+]
+
+[tool.pyrefly]
+project-includes = ["**/*"]
+project-excludes = [
+  "**/__pycache__",
+  "**/*venv/**/*",
 ]
 
 [tool.ruff.lint.per-file-ignores]

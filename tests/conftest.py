@@ -4,7 +4,7 @@ import pytest
 
 
 @pytest.fixture
-def minimal_job():
+def minimal_job() -> dict[str, list[dict[str, str]] | str]:
     """Minimal valid job configuration."""
     return {"runs-on": "ubuntu-latest", "steps": [{"run": "echo hello"}]}
 

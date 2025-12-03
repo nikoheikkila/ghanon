@@ -4,7 +4,7 @@ from ghanon.domain.workflow import WorkflowCallEvent, WorkflowCallInputType
 
 
 class TestWorkflowCallEvent:
-    def test_inputs(self):
+    def test_inputs(self) -> None:
         event = WorkflowCallEvent.model_validate(
             {
                 "inputs": {
@@ -18,7 +18,7 @@ class TestWorkflowCallEvent:
         assert_that(event.inputs["environment"].type).is_equal_to(WorkflowCallInputType.STRING)
         assert_that(event.inputs["debug"].default).is_false()
 
-    def test_outputs(self):
+    def test_outputs(self) -> None:
         event = WorkflowCallEvent.model_validate(
             {
                 "outputs": {
@@ -34,7 +34,7 @@ class TestWorkflowCallEvent:
         assert_that(event.outputs["version"].description).is_equal_to("v1.2.3")
         assert_that(event.outputs["version"].value).is_equal_to("${{ jobs.build.outputs.version }}")
 
-    def test_secrets(self):
+    def test_secrets(self) -> None:
         event = WorkflowCallEvent.model_validate(
             {
                 "secrets": {

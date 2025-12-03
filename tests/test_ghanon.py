@@ -24,20 +24,20 @@ def find(name: str) -> str:
 class TestValidCases:
     """Scenario Outline: Valid Cases"""
 
-    def test_cli_help(self, runner: CliRunner):
+    def test_cli_help(self, runner: CliRunner) -> None:
         result = runner.invoke(main, args=["--help"])
 
         assert_that(result).has_exit_code(0)
         assert_that(result.output).snapshot("test_cli_help_output")
 
     @pytest.mark.parametrize("workflow", ["simple_workflow.yml", "complex_workflow.yml"])
-    def test_valid_workflow(self, runner: CliRunner, workflow: str):
+    def test_valid_workflow(self, runner: CliRunner, workflow: str) -> None:
         result = runner.invoke(main, args=[find(workflow)])
 
         assert_that(result).has_exit_code(0)
         assert_that(result.output).matches(r"is a valid workflow")
 
-    def test_valid_workflow_with_verbose(self, runner: CliRunner):
+    def test_valid_workflow_with_verbose(self, runner: CliRunner) -> None:
         result = runner.invoke(main, args=["--verbose", find("complex_workflow.yml")])
 
         assert_that(result).has_exit_code(0)
@@ -78,7 +78,7 @@ class TestErrorCases:
             ("pyproject.toml", r"Error parsing YAML"),
         ],
     )
-    def test_raises_error(self, runner: CliRunner, workflow: str, expected_error: str):
+    def test_raises_error(self, runner: CliRunner, workflow: str, expected_error: str) -> None:
         assert isinstance(main, Command)
 
         result = runner.invoke(main, args=[workflow])

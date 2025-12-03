@@ -9,11 +9,11 @@ from ghanon.domain.workflow import (
 
 
 class TestWorkflowDispatchEvent:
-    def test_empty(self):
+    def test_empty(self) -> None:
         event = WorkflowDispatchEvent.model_validate({})
         assert_that(event.inputs).is_none()
 
-    def test_string_input(self):
+    def test_string_input(self) -> None:
         event = WorkflowDispatchEvent.model_validate(
             {
                 "inputs": {
@@ -29,7 +29,7 @@ class TestWorkflowDispatchEvent:
         assert event.inputs is not None
         assert_that(event.inputs["name"].type).is_equal_to(WorkflowDispatchInputType.STRING)
 
-    def test_boolean_input(self):
+    def test_boolean_input(self) -> None:
         event = WorkflowDispatchEvent.model_validate(
             {
                 "inputs": {
@@ -45,7 +45,7 @@ class TestWorkflowDispatchEvent:
         assert event.inputs is not None
         assert_that(event.inputs["debug"].type).is_equal_to(WorkflowDispatchInputType.BOOLEAN)
 
-    def test_choice_input(self):
+    def test_choice_input(self) -> None:
         event = WorkflowDispatchEvent.model_validate(
             {
                 "inputs": {
@@ -61,7 +61,7 @@ class TestWorkflowDispatchEvent:
         assert event.inputs is not None
         assert_that(event.inputs["env"].options).is_equal_to(["dev", "staging", "prod"])
 
-    def test_choice_requires_options(self):
+    def test_choice_requires_options(self) -> None:
         assert_that(WorkflowDispatchInput.model_validate).raises(ValidationError).when_called_with(
             {
                 "description": "Env",
@@ -69,7 +69,7 @@ class TestWorkflowDispatchEvent:
             },
         )
 
-    def test_required_input(self):
+    def test_required_input(self) -> None:
         event = WorkflowDispatchEvent.model_validate(
             {
                 "inputs": {"token": {"description": "API Token", "required": True}},

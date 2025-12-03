@@ -5,12 +5,12 @@ from ghanon.domain.workflow import PullRequestActivityType, PullRequestTargetEve
 
 
 class TestPullRequestTargetEvent:
-    def test_types(self):
+    def test_types(self) -> None:
         types = [PullRequestActivityType.LABELED, PullRequestActivityType.OPENED]
         event = PullRequestTargetEvent.model_validate({"types": types})
         assert_that(event.types).contains(*types)
 
-    def test_filter_exclusivity(self):
+    def test_filter_exclusivity(self) -> None:
         assert_that(PullRequestTargetEvent.model_validate).raises(ValidationError).when_called_with(
             {
                 "branches": ["main"],

@@ -118,6 +118,6 @@ class TestActivityTypeEvent:
             ),
         ],
     )
-    def test_activity_types(self, event_class, types):
+    def test_activity_types(self, event_class, types) -> None:
         event = event_class.model_validate({"types": types})
         assert_that(event.types).contains(*types)

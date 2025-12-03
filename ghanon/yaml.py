@@ -46,7 +46,10 @@ class YamlLoader:
 
         """
         try:
-            return self._traverse_node(yaml.compose(yaml_content), [])
+            node = yaml.compose(yaml_content)
+            if node is None:
+                return {}
+            return self._traverse_node(node, [])
         except yaml.YAMLError:
             return {}
 

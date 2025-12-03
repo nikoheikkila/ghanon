@@ -4,7 +4,7 @@ from ghanon.domain.workflow import WorkflowRunActivityType, WorkflowRunEvent
 
 
 class TestWorkflowRunEvent:
-    def test_types(self):
+    def test_types(self) -> None:
         event = WorkflowRunEvent.model_validate(
             {
                 "types": [WorkflowRunActivityType.COMPLETED],
@@ -15,7 +15,7 @@ class TestWorkflowRunEvent:
         assert_that(event.types).contains(WorkflowRunActivityType.COMPLETED)
         assert_that(event.workflows).contains("CI")
 
-    def test_branches(self):
+    def test_branches(self) -> None:
         event = WorkflowRunEvent.model_validate(
             {
                 "workflows": ["Build"],

@@ -16,7 +16,7 @@ class TestWorkflowModel:
             "job@test",
         ],
     )
-    def test_invalid_job_id(self, job_id):
+    def test_invalid_job_id(self, job_id) -> None:
         workflow_data = {
             "name": "Test",
             "on": "push",
@@ -46,7 +46,7 @@ class TestWorkflowModel:
             "Build_And_Deploy-v2",
         ],
     )
-    def test_valid_job_id(self, job_id):
+    def test_valid_job_id(self, job_id) -> None:
         workflow_data = {
             "name": "Test",
             "on": "push",
