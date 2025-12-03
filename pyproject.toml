@@ -35,6 +35,9 @@ documentation = "https://github.com/nikoheikkila/ghanon/blob/master/README.md"
 changelog = "https://github.com/nikoheikkila/ghanon/blob/master/CHANGELOG.md"
 issues = "https://github.com/nikoheikkila/ghanon/issues"
 
+[project.scripts]
+ghanon = "ghanon.cli:main"
+
 [dependency-groups]
 dev = [
     "assertpy>=1.1",
@@ -93,3 +96,7 @@ omit = [
     "*/site-packages/*",
     "*/__pycache__/*",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
