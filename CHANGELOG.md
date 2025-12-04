@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/nikoheikkila/ghanon/compare/v0.2.0...v0.2.1) (2025-12-04)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** remove --locked from uv sync ([a78b6a1](https://github.com/nikoheikkila/ghanon/commit/a78b6a18f63d5eb252671f55e77a430a78cc92ec))
+
 ## [0.2.0](https://github.com/nikoheikkila/ghanon/compare/v0.1.0...v0.2.0) (2025-12-04)
 
 
