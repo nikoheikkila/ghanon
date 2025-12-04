@@ -6,8 +6,16 @@ tasks:
 
   install:
     desc: Install dependencies
+    sources:
+      - pyproject.toml
+      - uv.lock
     cmds:
       - uv sync --locked --all-extras --all-packages --dev
+
+  build:
+    desc: Build the package
+    cmds:
+      - uv build
 
   lint:
     desc: Lint the codebase
