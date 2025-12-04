@@ -1,6 +1,6 @@
 [project]
 name = "ghanon"
-version = "0.1.0"
+version = "0.2.0"
 description = "The GitHub Actions Best Practices Linter"
 authors = [
     { name = "Niko Heikkilä", email = "yo@nikoheikkila.fi" }
