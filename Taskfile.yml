@@ -10,7 +10,7 @@ tasks:
       - pyproject.toml
       - uv.lock
     cmds:
-      - uv sync --locked --all-extras --all-packages --dev
+      - uv sync --all-extras --all-packages --dev
 
   build:
     desc: Build the package
