@@ -90,9 +90,6 @@ Uses `uv` for dependency management. Python 3.14+ required.
 ```bash
 # Install dependencies
 task install
-
-# Run application
-task run -- path/to/workflow.yml
 ```
 
 ### Testing
