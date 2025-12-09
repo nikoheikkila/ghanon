@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/nikoheikkila/ghanon/compare/v0.2.1...v0.2.2) (2025-12-09)
+
+
+### 📚 Documentation
+
+* add more agentic instructions ([fb6b3ae](https://github.com/nikoheikkila/ghanon/commit/fb6b3ae9b60a7fd009a71c7b113cf4e704f60edb))
+
 ## [0.2.1](https://github.com/nikoheikkila/ghanon/compare/v0.2.0...v0.2.1) (2025-12-04)
 
 
